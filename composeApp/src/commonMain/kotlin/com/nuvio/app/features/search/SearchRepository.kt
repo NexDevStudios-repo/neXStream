@@ -82,6 +82,11 @@ object SearchRepository {
             return
         }
 
+        if (com.nuvio.app.features.sourcemode.SourceModeRepository.mode.value == com.nuvio.app.features.sourcemode.SourceMode.XTREAM) {
+            searchXtream(normalizedQuery)
+            return
+        }
+
         val enabledAddons = addons.enabledAddons()
         val hasPendingAddonManifests = enabledAddons.hasPendingEnabledManifests()
         val addonManifestErrorMessage = enabledAddons.firstEnabledManifestError()
@@ -198,6 +203,49 @@ object SearchRepository {
                 },
                 errorMessage = if (allFailed) firstFailure else null,
             )
+        }
+    }
+
+    private fun searchXtream(query: String) {
+        activeJob?.cancel()
+        _uiState.value = SearchUiState(isLoading = true)
+        activeJob = scope.launch {
+            try {
+                val results = com.nuvio.app.features.xtream.XtreamRepository.search(query)
+                if (results.isEmpty()) {
+                    _uiState.value = SearchUiState(
+                        isLoading = false,
+                        emptyStateReason = SearchEmptyStateReason.NoResults,
+                    )
+                } else {
+                    val section = HomeCatalogSection(
+                        key = "xtream_search",
+                        title = "Resultados",
+                        subtitle = "Xtream Codes",
+                        addonName = "Xtream",
+                        target = CatalogTarget.Addon(
+                            manifestUrl = "xtream",
+                            contentType = "search",
+                            catalogId = "search"
+                        ),
+                        items = results,
+                        availableItemCount = results.size,
+                        hasMore = false,
+                    )
+                    _uiState.value = SearchUiState(
+                        isLoading = false,
+                        sections = listOf(section),
+                    )
+                }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _uiState.value = SearchUiState(
+                    isLoading = false,
+                    emptyStateReason = SearchEmptyStateReason.RequestFailed,
+                    errorMessage = e.message,
+                )
+            }
         }
     }
 

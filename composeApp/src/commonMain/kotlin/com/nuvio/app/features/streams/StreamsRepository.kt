@@ -158,6 +158,26 @@ object StreamsRepository {
             return
         }
 
+        if (videoId.startsWith("xtream:") || parentMetaId?.startsWith("xtream:") == true) {
+            val xtreamStreams = com.nuvio.app.features.xtream.XtreamRepository.getStreamItems(videoId)
+            if (xtreamStreams.isNotEmpty()) {
+                val group = AddonStreamGroup(
+                    addonName = xtreamStreams.first().addonName,
+                    addonId = "xtream",
+                    streams = xtreamStreams,
+                    isLoading = false,
+                )
+                _uiState.value = StreamsUiState(
+                    requestToken = requestToken,
+                    groups = listOf(group),
+                    autoPlayDecided = true,
+                    activeAddonIds = setOf("xtream"),
+                    isAnyLoading = false,
+                )
+                return
+            }
+        }
+
         val installedAddons = AddonRepository.uiState.value.addons.enabledAddons()
         val pluginScrapers = if (AppFeaturePolicy.pluginsEnabled) {
             PluginRepository.getEnabledScrapersForType(type)

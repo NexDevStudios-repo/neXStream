@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.BugReport
+import androidx.compose.material.icons.rounded.Dns
 import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.Extension
 import androidx.compose.material.icons.rounded.Favorite
@@ -73,6 +74,7 @@ internal fun LazyListScope.settingsRootContent(
     onAdvancedClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onContentDiscoveryClick: () -> Unit,
+    onXtreamSourcesClick: () -> Unit = {},
     onIntegrationsClick: () -> Unit,
     onTrackingClick: () -> Unit,
     onSupportersContributorsClick: () -> Unit,
@@ -144,6 +146,14 @@ internal fun LazyListScope.settingsRootContent(
                         icon = Icons.Rounded.Extension,
                         isTablet = isTablet,
                         onClick = onContentDiscoveryClick,
+                    )
+                    SettingsGroupDivider(isTablet = isTablet)
+                    SettingsNavigationRow(
+                        title = "Fuente de Contenido",
+                        description = "Plugins Stremio y Servidores Xtream Codes IPTV",
+                        icon = Icons.Rounded.Dns,
+                        isTablet = isTablet,
+                        onClick = onXtreamSourcesClick,
                     )
                     SettingsGroupDivider(isTablet = isTablet)
                     SettingsNavigationRow(

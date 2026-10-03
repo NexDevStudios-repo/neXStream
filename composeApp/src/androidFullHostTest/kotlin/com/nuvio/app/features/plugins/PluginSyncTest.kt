@@ -3,8 +3,6 @@ package com.nuvio.app.features.plugins
 import com.nuvio.app.core.network.ServerCapabilities
 import com.nuvio.app.core.network.ServerConfiguration
 import com.nuvio.app.core.network.ServerConfigurationRepository
-import com.nuvio.app.core.network.ServerConfigurationStorage
-import com.nuvio.app.core.network.SupabaseProvider
 import com.nuvio.app.features.addons.AddonRepository
 import com.nuvio.app.features.addons.AddonStorage
 import com.russhwolf.settings.SettingsInitializer
@@ -54,14 +52,12 @@ class PluginSyncTest {
                 ),
             ),
         )
-        SupabaseProvider.reset()
     }
 
     @After
     fun tearDown(): Unit = runBlocking {
         PluginRepository.clearLocalState()
         AddonRepository.clearLocalState()
-        SupabaseProvider.reset()
         ServerConfigurationRepository.useOfficial()
         server.shutdown()
     }

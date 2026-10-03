@@ -49,14 +49,14 @@ object ServerConfigurationRepository {
 }
 
 internal fun officialConfiguration() = ServerConfiguration(
-    backendUrl = SupabaseConfig.URL.trim().trimEnd('/'),
-    publishableKey = SupabaseConfig.ANON_KEY.trim(),
+    backendUrl = "https://local.nexstream",
+    publishableKey = "local",
     capabilities = ServerCapabilities(
-        emailPasswordAuth = true,
-        tvLogin = true,
+        emailPasswordAuth = false,
+        tvLogin = false,
     ),
     isCustom = false,
-    fallbackBackendUrl = SupabaseConfig.FALLBACK_URL.trim().trimEnd('/').takeIf { it.isNotBlank() },
+    fallbackBackendUrl = null,
 )
 
 internal fun isPublicServerHost(url: String): Boolean {

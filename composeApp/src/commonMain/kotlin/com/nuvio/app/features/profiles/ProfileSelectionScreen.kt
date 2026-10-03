@@ -119,7 +119,7 @@ fun ProfileSelectionScreen(
         modifier = modifier
             .fillMaxSize(),
     ) {
-        val isTabletLayout = maxWidth >= 768.dp
+        val isTabletLayout = com.nuvio.app.core.util.isTvDevice() || maxWidth >= 768.dp
         ProfileBackgroundBackdrop(
             profile = backgroundProfile,
             modifier = Modifier.fillMaxSize(),

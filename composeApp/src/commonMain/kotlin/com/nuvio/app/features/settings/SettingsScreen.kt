@@ -696,6 +696,7 @@ private fun MobileSettingsScreen(
                             onAdvancedClick = { onPageChange(SettingsPage.Advanced) },
                             onNotificationsClick = { onPageChange(SettingsPage.Notifications) },
                             onContentDiscoveryClick = { onPageChange(SettingsPage.ContentDiscovery) },
+                            onXtreamSourcesClick = { onPageChange(SettingsPage.XtreamSources) },
                             onIntegrationsClick = { onPageChange(SettingsPage.Integrations) },
                             onTrackingClick = { onPageChange(SettingsPage.TraktAuthentication) },
                             onSupportersContributorsClick = onSupportersContributorsClick,
@@ -705,6 +706,14 @@ private fun MobileSettingsScreen(
                             onAccountClick = onAccountClick,
                             onSwitchProfileClick = onSwitchProfile,
                             showSupportersContributorsPage = AppFeaturePolicy.supportersContributorsPageEnabled,
+                        )
+                    }
+                }
+                SettingsPage.XtreamSources -> {
+                    item {
+                        XtreamSettingsPage(
+                            isTablet = false,
+                            onBack = onNavigateBack,
                         )
                     }
                 }
@@ -1117,6 +1126,7 @@ private fun TabletSettingsScreen(
                                 onAdvancedClick = { openInlinePage(SettingsPage.Advanced) },
                                 onNotificationsClick = { openInlinePage(SettingsPage.Notifications) },
                                 onContentDiscoveryClick = { openInlinePage(SettingsPage.ContentDiscovery) },
+                                onXtreamSourcesClick = { openInlinePage(SettingsPage.XtreamSources) },
                                 onIntegrationsClick = { openInlinePage(SettingsPage.Integrations) },
                                 onTrackingClick = { openInlinePage(SettingsPage.TraktAuthentication) },
                                 onSupportersContributorsClick = { openInlinePage(SettingsPage.SupportersContributors) },
@@ -1130,6 +1140,14 @@ private fun TabletSettingsScreen(
                                 showAboutSection = activeCategory == SettingsCategory.About,
                                 showAdvancedSection = activeCategory == SettingsCategory.Advanced,
                                 showSupportersContributorsPage = AppFeaturePolicy.supportersContributorsPageEnabled,
+                            )
+                        }
+                    }
+                    SettingsPage.XtreamSources -> {
+                        item {
+                            XtreamSettingsPage(
+                                isTablet = true,
+                                onBack = onNavigateBack,
                             )
                         }
                     }

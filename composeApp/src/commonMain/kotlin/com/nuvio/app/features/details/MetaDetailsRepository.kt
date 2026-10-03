@@ -51,6 +51,20 @@ object MetaDetailsRepository {
 
     fun load(type: String, id: String) {
         log.d { "load() called — type=$type id=$id" }
+        if (id.startsWith("xtream:")) {
+            val requestKey = "$type:$id"
+            activeRequestKey = requestKey
+            _uiState.value = MetaDetailsUiState(isLoading = true)
+            scope.launch {
+                try {
+                    val meta = com.nuvio.app.features.xtream.XtreamRepository.getMetaDetails(id)
+                    _uiState.value = MetaDetailsUiState(meta = meta)
+                } catch (e: Exception) {
+                    _uiState.value = MetaDetailsUiState(errorMessage = e.message)
+                }
+            }
+            return
+        }
         val requestKey = "$type:$id"
         val currentState = _uiState.value
         val mdbListSettings = MdbListSettingsRepository.snapshot()

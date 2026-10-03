@@ -67,7 +67,8 @@ internal fun MainTabsDestination(
     PlatformBackHandler(enabled = rootRouteActive, onBack = onBack)
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val isTabletLayout = useTabletFloatingTabBar || maxWidth >= 768.dp
+        val isTv = com.nuvio.app.core.util.isTvDevice()
+        val isTabletLayout = useTabletFloatingTabBar || isTv || maxWidth >= 768.dp
         val tabActions = remember(actions, isTabletLayout) { actions(isTabletLayout) }
         val useNativeBottomTabs = if (useNativeNavigation) {
             useNativeTabBar

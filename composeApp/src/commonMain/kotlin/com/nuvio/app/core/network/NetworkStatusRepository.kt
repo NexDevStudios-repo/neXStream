@@ -135,17 +135,6 @@ object NetworkStatusRepository {
         if (!internetReachable) {
             return NetworkCondition.NoInternet
         }
-
-        val supabaseReachable = SupabaseEndpointConfig.restEndpointUrls().any { url ->
-            probeReachable(
-                url = url,
-                headers = mapOf("apikey" to ServerConfigurationRepository.active.value.publishableKey),
-            )
-        }
-        if (!supabaseReachable) {
-            return NetworkCondition.ServersUnreachable
-        }
-
         return NetworkCondition.Online
     }
 

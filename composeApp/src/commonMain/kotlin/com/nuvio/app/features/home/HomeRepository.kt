@@ -47,6 +47,10 @@ object HomeRepository {
     private var lastErrorMessage: String? = null
 
     fun refresh(addons: List<ManagedAddon>, force: Boolean = false) {
+        if (com.nuvio.app.features.sourcemode.SourceModeRepository.mode.value == com.nuvio.app.features.sourcemode.SourceMode.XTREAM) {
+            refreshXtream(force)
+            return
+        }
         val activeAddons = addons.enabledAddons()
         val requests = buildHomeCatalogDefinitions(activeAddons)
         currentDefinitions = requests
@@ -433,6 +437,32 @@ object HomeRepository {
             append(":")
             append(addon.manifest?.catalogs?.size ?: 0)
             append(";")
+        }
+    }
+
+    private fun refreshXtream(force: Boolean = false) {
+        activeJob?.cancel()
+        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+        activeJob = scope.launch {
+            try {
+                val sections = com.nuvio.app.features.xtream.XtreamRepository.fetchHomeCatalogSections()
+                val heroItems = sections.flatMap { it.items.filter { item -> item.type == "movie" || item.type == "series" } }.take(8)
+                _uiState.value = HomeUiState(
+                    isLoading = false,
+                    heroItems = heroItems,
+                    sections = sections,
+                    errorMessage = null,
+                )
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _uiState.value = HomeUiState(
+                    isLoading = false,
+                    heroItems = emptyList(),
+                    sections = emptyList(),
+                    errorMessage = e.message ?: "Error cargando contenido de Xtream",
+                )
+            }
         }
     }
 

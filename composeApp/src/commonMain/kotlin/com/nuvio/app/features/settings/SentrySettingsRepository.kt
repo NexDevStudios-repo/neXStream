@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 internal object SentrySettingsRepository {
     val isSupported: Boolean
-        get() = SentrySettingsPlatform.crashReportsSupported
+        get() = false
 
     private val _enabled = MutableStateFlow(true)
     val enabled: StateFlow<Boolean> = _enabled.asStateFlow()

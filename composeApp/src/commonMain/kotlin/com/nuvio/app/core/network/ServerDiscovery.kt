@@ -98,8 +98,7 @@ internal object ServerDiscoveryPolicy {
     }
 
     fun isOfficial(candidateUrl: String): Boolean =
-        matchesBackend(candidateUrl, SupabaseConfig.URL) ||
-            matchesBackend(candidateUrl, canonicalOfficialBackend)
+        matchesBackend(candidateUrl, canonicalOfficialBackend)
 
     private fun matchesBackend(candidateUrl: String, backendUrl: String): Boolean {
         val candidate = runCatching { Url(candidateUrl) }.getOrNull() ?: return false

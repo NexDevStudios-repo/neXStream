@@ -110,6 +110,11 @@ internal enum class SettingsPage(
         category = SettingsCategory.General,
         parentPage = Root,
     ),
+    XtreamSources(
+        titleRes = Res.string.compose_settings_page_addons,
+        category = SettingsCategory.General,
+        parentPage = Root,
+    ),
     Addons(
         titleRes = Res.string.compose_settings_page_addons,
         category = SettingsCategory.General,

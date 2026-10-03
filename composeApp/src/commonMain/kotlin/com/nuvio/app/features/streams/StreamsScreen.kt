@@ -230,7 +230,7 @@ fun StreamsScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        val isTabletLayout = maxWidth >= 768.dp
+        val isTabletLayout = com.nuvio.app.core.util.isTvDevice() || maxWidth >= 768.dp
 
         if (isTabletLayout) {
             TabletStreamsLayout(
