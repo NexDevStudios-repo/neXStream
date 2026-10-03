@@ -46,11 +46,9 @@ object HomeRepository {
     private var lastPublishedCatalogHeroEmpty: Boolean = true
     private var lastErrorMessage: String? = null
 
-    fun refresh(addons: List<ManagedAddon>, force: Boolean = false) {
-        if (com.nuvio.app.features.sourcemode.SourceModeRepository.mode.value == com.nuvio.app.features.sourcemode.SourceMode.XTREAM) {
-            refreshXtream(force)
-            return
-        }
+    fun refresh(addons: List<ManagedAddon> = emptyList(), force: Boolean = false) {
+        refreshXtream(force)
+    }
         val activeAddons = addons.enabledAddons()
         val requests = buildHomeCatalogDefinitions(activeAddons)
         currentDefinitions = requests

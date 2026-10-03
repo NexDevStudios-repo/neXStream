@@ -73,7 +73,7 @@ object SearchRepository {
 
     fun search(
         query: String,
-        addons: List<ManagedAddon>,
+        addons: List<ManagedAddon> = emptyList(),
         forceRefresh: Boolean = false,
     ) {
         val normalizedQuery = query.trim()
@@ -82,10 +82,8 @@ object SearchRepository {
             return
         }
 
-        if (com.nuvio.app.features.sourcemode.SourceModeRepository.mode.value == com.nuvio.app.features.sourcemode.SourceMode.XTREAM) {
-            searchXtream(normalizedQuery)
-            return
-        }
+        searchXtream(normalizedQuery)
+    }
 
         val enabledAddons = addons.enabledAddons()
         val hasPendingAddonManifests = enabledAddons.hasPendingEnabledManifests()

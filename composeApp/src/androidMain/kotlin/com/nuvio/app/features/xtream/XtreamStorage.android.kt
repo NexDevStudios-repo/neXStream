@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 actual object XtreamStorage {
     private const val PREFS_NAME = "nexstream_xtream_servers"
     private const val KEY_SERVERS_JSON = "servers_json"
+    private const val KEY_ACTIVE_SERVER_ID = "active_server_id"
 
     private var preferences: SharedPreferences? = null
 
@@ -18,5 +19,12 @@ actual object XtreamStorage {
 
     actual fun saveServersJson(json: String) {
         preferences?.edit()?.putString(KEY_SERVERS_JSON, json)?.apply()
+    }
+
+    actual fun loadActiveServerId(): String? =
+        preferences?.getString(KEY_ACTIVE_SERVER_ID, null)
+
+    actual fun saveActiveServerId(serverId: String?) {
+        preferences?.edit()?.putString(KEY_ACTIVE_SERVER_ID, serverId)?.apply()
     }
 }

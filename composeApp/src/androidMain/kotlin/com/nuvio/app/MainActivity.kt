@@ -83,8 +83,6 @@ open class MainActivity : AppCompatActivity() {
         )
         ThemeSettingsStorage.initialize(applicationContext)
         AppIconPlatform.initialize(applicationContext)
-        com.nuvio.app.features.sourcemode.SourceModeStorage.initialize(applicationContext)
-        com.nuvio.app.features.sourcemode.SourceModeRepository.initialize()
         com.nuvio.app.features.xtream.XtreamStorage.initialize(applicationContext)
         com.nuvio.app.features.xtream.XtreamRepository.initialize()
         super.onCreate(savedInstanceState)

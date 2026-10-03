@@ -4,7 +4,6 @@ import co.touchlab.kermit.Logger
 import com.nuvio.app.features.details.MetaDetails
 import com.nuvio.app.features.home.HomeCatalogSection
 import com.nuvio.app.features.home.MetaPreview
-import com.nuvio.app.features.sourcemode.SourceModeRepository
 import com.nuvio.app.features.streams.StreamItem
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -49,11 +48,11 @@ object XtreamRepository {
             emptyList()
         }
         _servers.value = list
-        val activeId = SourceModeRepository.activeXtreamServerId.value
+        val activeId = XtreamStorage.loadActiveServerId()
         val active = list.find { it.id == activeId } ?: list.firstOrNull()
         _activeServer.value = active
         if (active != null && active.id != activeId) {
-            SourceModeRepository.setActiveXtreamServerId(active.id)
+            XtreamStorage.saveActiveServerId(active.id)
         }
     }
 
@@ -93,7 +92,7 @@ object XtreamRepository {
     fun selectServer(serverId: String) {
         val server = _servers.value.find { it.id == serverId }
         _activeServer.value = server
-        SourceModeRepository.setActiveXtreamServerId(server?.id)
+        XtreamStorage.saveActiveServerId(server?.id)
         clearCache()
     }
 
@@ -103,7 +102,7 @@ object XtreamRepository {
         if (_activeServer.value?.id == serverId) {
             val next = updated.firstOrNull()
             _activeServer.value = next
-            SourceModeRepository.setActiveXtreamServerId(next?.id)
+            XtreamStorage.saveActiveServerId(next?.id)
         }
         clearCache()
     }

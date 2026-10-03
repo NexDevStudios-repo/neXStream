@@ -12,7 +12,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.rounded.Dns
-import androidx.compose.material.icons.rounded.Extension
 import androidx.compose.material.icons.rounded.Tv
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -27,8 +26,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nuvio.app.core.ui.NuvioBackButton
 import com.nuvio.app.core.ui.NuvioTokens
 import com.nuvio.app.core.ui.nuvio
-import com.nuvio.app.features.sourcemode.SourceMode
-import com.nuvio.app.features.sourcemode.SourceModeRepository
 import com.nuvio.app.features.xtream.XtreamRepository
 import com.nuvio.app.features.xtream.XtreamServerAccount
 import kotlinx.coroutines.launch
@@ -41,7 +38,6 @@ fun XtreamSettingsPage(
 ) {
     val tokens = MaterialTheme.nuvio
     val coroutineScope = rememberCoroutineScope()
-    val sourceMode by SourceModeRepository.mode.collectAsStateWithLifecycle()
     val servers by XtreamRepository.servers.collectAsStateWithLifecycle()
     val activeServer by XtreamRepository.activeServer.collectAsStateWithLifecycle()
 
@@ -68,7 +64,7 @@ fun XtreamSettingsPage(
             NuvioBackButton(onClick = onBack)
             Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = "Fuente de Contenido",
+                text = "Servidores IPTV",
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold,
                     color = tokens.colors.textPrimary
@@ -85,220 +81,110 @@ fun XtreamSettingsPage(
         ) {
             item {
                 SettingsGroup(isTablet = isTablet) {
-                    Text(
-                        text = "Modo de Fuente Activo",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            color = tokens.colors.textPrimary
-                        ),
-                        modifier = Modifier.padding(16.dp)
-                    )
-
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(if (sourceMode == SourceMode.PLUGINS) tokens.colors.surfaceCard else tokens.colors.surface)
-                            .clickable { SourceModeRepository.setSourceMode(SourceMode.PLUGINS) }
                             .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Extension,
-                            contentDescription = null,
-                            tint = if (sourceMode == SourceMode.PLUGINS) tokens.colors.accent else tokens.colors.textSecondary
+                        Text(
+                            text = "Servidores Configurados",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                color = tokens.colors.textPrimary
+                            )
                         )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Plugins & Addons",
-                                style = MaterialTheme.typography.bodyLarge.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = tokens.colors.textPrimary
-                                )
-                            )
-                            Text(
-                                text = "Scrapers de torrents, debrid, metadatos y catálogo Stremio",
-                                style = MaterialTheme.typography.bodySmall.copy(color = tokens.colors.textSecondary)
-                            )
-                        }
-                        if (sourceMode == SourceMode.PLUGINS) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = null,
-                                tint = tokens.colors.accent
-                            )
+
+                        Button(
+                            onClick = {
+                                serverName = ""
+                                serverUrl = ""
+                                username = ""
+                                password = ""
+                                addError = null
+                                showAddDialog = true
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = tokens.colors.accent
+                            ),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Icon(imageVector = Icons.Default.Add, contentDescription = null)
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Añadir Servidor")
                         }
                     }
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(if (sourceMode == SourceMode.XTREAM) tokens.colors.surfaceCard else tokens.colors.surface)
-                            .clickable { SourceModeRepository.setSourceMode(SourceMode.XTREAM) }
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Tv,
-                            contentDescription = null,
-                            tint = if (sourceMode == SourceMode.XTREAM) tokens.colors.accent else tokens.colors.textSecondary
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column(modifier = Modifier.weight(1f)) {
+                    if (servers.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Text(
-                                text = "Xtream Codes (IPTV)",
-                                style = MaterialTheme.typography.bodyLarge.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = tokens.colors.textPrimary
-                                )
-                            )
-                            Text(
-                                text = "Canales en vivo, películas VOD y series de tu proveedor IPTV",
-                                style = MaterialTheme.typography.bodySmall.copy(color = tokens.colors.textSecondary)
-                            )
-                        }
-                        if (sourceMode == SourceMode.XTREAM) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = null,
-                                tint = tokens.colors.accent
+                                text = "No tienes ningún servidor IPTV configurado.\nToca en 'Añadir Servidor' para ingresar tus credenciales Xtream Codes.",
+                                style = MaterialTheme.typography.bodyMedium.copy(color = tokens.colors.textSecondary),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
 
-            if (sourceMode == SourceMode.XTREAM) {
-                item {
-                    SettingsGroup(isTablet = isTablet) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+            items(servers, key = { it.id }) { server ->
+                val isSelected = activeServer?.id == server.id
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { XtreamRepository.selectServer(server.id) },
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (isSelected) tokens.colors.surfaceCard else tokens.colors.surface
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Dns,
+                            contentDescription = null,
+                            tint = if (isSelected) tokens.colors.accent else tokens.colors.textSecondary
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Servidores Xtream Configurados",
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.SemiBold,
+                                text = server.name,
+                                style = MaterialTheme.typography.titleSmall.copy(
+                                    fontWeight = FontWeight.Bold,
                                     color = tokens.colors.textPrimary
                                 )
                             )
-
-                            Button(
-                                onClick = {
-                                    serverName = ""
-                                    serverUrl = ""
-                                    username = ""
-                                    password = ""
-                                    addError = null
-                                    showAddDialog = true
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = tokens.colors.accent
-                                ),
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Icon(imageVector = Icons.Default.Add, contentDescription = null)
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("Añadir Servidor")
-                            }
-                        }
-
-                        if (servers.isEmpty()) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(32.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "No tienes ningún servidor Xtream configurado.\nToca en 'Añadir Servidor' para ingresar tus credenciales.",
-                                    style = MaterialTheme.typography.bodyMedium.copy(color = tokens.colors.textSecondary),
-                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            Text(
+                                text = "${server.serverUrl} · ${server.username}",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = tokens.colors.textSecondary
                                 )
-                            }
-                        }
-                    }
-                }
-
-                items(servers, key = { it.id }) { server ->
-                    val isSelected = activeServer?.id == server.id
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { XtreamRepository.selectServer(server.id) },
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (isSelected) tokens.colors.surfaceCard else tokens.colors.surface
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Dns,
-                                contentDescription = null,
-                                tint = if (isSelected) tokens.colors.accent else tokens.colors.textSecondary
                             )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = server.name,
-                                    style = MaterialTheme.typography.titleSmall.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        color = tokens.colors.textPrimary
-                                    )
-                                )
-                                Text(
-                                    text = server.serverUrl,
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        color = tokens.colors.textSecondary
-                                    )
-                                )
-                                Text(
-                                    text = "Usuario: ${server.username}",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        color = tokens.colors.textSecondary
-                                    )
-                                )
-                            }
-
-                            if (isSelected) {
-                                Text(
-                                    text = "ACTIVO",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        color = tokens.colors.accent
-                                    ),
-                                    modifier = Modifier
-                                        .background(
-                                            tokens.colors.accent.copy(alpha = 0.15f),
-                                            RoundedCornerShape(4.dp)
-                                        )
-                                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                            }
-
-                            IconButton(
-                                onClick = { XtreamRepository.deleteServer(server.id) }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = "Eliminar",
-                                    tint = tokens.colors.textSecondary
-                                )
-                            }
+                        }
+                        if (isSelected) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Servidor Activo",
+                                tint = tokens.colors.accent
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                        }
+                        IconButton(onClick = { XtreamRepository.deleteServer(server.id) }) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Eliminar",
+                                tint = tokens.colors.danger
+                            )
                         }
                     }
                 }
@@ -311,33 +197,31 @@ fun XtreamSettingsPage(
             onDismissRequest = { if (!isAdding) showAddDialog = false },
             title = {
                 Text(
-                    text = "Añadir Servidor Xtream",
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                    text = "Añadir Cuenta Xtream Codes",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
             },
             text = {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     OutlinedTextField(
                         value = serverName,
                         onValueChange = { serverName = it },
-                        label = { Text("Nombre del Servidor") },
-                        placeholder = { Text("Ej: Mi IPTV") },
+                        label = { Text("Nombre del Servidor (opcional)") },
+                        placeholder = { Text("Mi IPTV") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
-
                     OutlinedTextField(
                         value = serverUrl,
                         onValueChange = { serverUrl = it },
                         label = { Text("URL del Servidor") },
-                        placeholder = { Text("http://linea.ejemplo.com:8080") },
+                        placeholder = { Text("http://ejemplo.com:8080") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
-
                     OutlinedTextField(
                         value = username,
                         onValueChange = { username = it },
@@ -345,7 +229,6 @@ fun XtreamSettingsPage(
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
-
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
@@ -354,21 +237,12 @@ fun XtreamSettingsPage(
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    addError?.let { err ->
+                    AnimatedVisibility(visible = addError != null) {
                         Text(
-                            text = err,
+                            text = addError.orEmpty(),
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall
                         )
-                    }
-
-                    if (isAdding) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                        }
                     }
                 }
             },
@@ -376,29 +250,37 @@ fun XtreamSettingsPage(
                 Button(
                     onClick = {
                         if (serverUrl.isBlank() || username.isBlank() || password.isBlank()) {
-                            addError = "Completa todos los campos obligatorios"
+                            addError = "Todos los campos de conexión son obligatorios"
                             return@Button
                         }
                         isAdding = true
                         addError = null
                         coroutineScope.launch {
                             val result = XtreamRepository.addServer(
-                                name = serverName.ifBlank { "Xtream IPTV" },
-                                serverUrl = serverUrl.trim(),
-                                username = username.trim(),
-                                password = password.trim()
+                                name = serverName,
+                                serverUrl = serverUrl,
+                                username = username,
+                                password = password
                             )
                             isAdding = false
                             if (result.isSuccess) {
                                 showAddDialog = false
                             } else {
-                                addError = result.exceptionOrNull()?.message ?: "Error al autenticar"
+                                addError = result.exceptionOrNull()?.message ?: "Error al autenticar con el servidor"
                             }
                         }
                     },
                     enabled = !isAdding
                 ) {
-                    Text("Conectar y Guardar")
+                    if (isAdding) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Text("Guardar y Conectar")
+                    }
                 }
             },
             dismissButton = {
