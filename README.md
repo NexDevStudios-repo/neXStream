@@ -1,55 +1,94 @@
 <div align="center">
 
-  <img src="https://nuvio.tv/assets/nuvio-app-logo-wordmark.webp" alt="Nuvio" width="320" />
+  <h1>⚡ neXStream</h1>
 
   <p>
-    A free, open-source media app for your phone, your desktop, and the TV you already own.
+    Un reproductor IPTV moderno, fluido y de alto rendimiento para Android y Android TV.
     <br />
-    Bring your own sources. Nuvio turns them into a library with artwork, ratings, subtitles, and your place saved on every screen.
+    Construido con Kotlin Multiplatform y Jetpack Compose (Material You).
   </p>
 
-  [Website](https://nuvio.tv) · [GitHub releases](https://github.com/NuvioMedia/NuvioMobile/releases/latest) · [Support Nuvio](https://nuvio.tv/support)
+  [Descargar APK (GitHub Releases)](https://github.com/NexDevStudios-repo/neXStream/releases/latest)
 
 </div>
 
-## Get Nuvio Mobile
+---
 
-- [Android on Google Play](https://play.google.com/store/apps/details?id=com.nuvio.app)
-- [Android APK](https://github.com/NuvioMedia/NuvioMobile/releases/latest)
-- iOS via AltStore or SideStore: add [this source URL](https://raw.githubusercontent.com/NuvioMedia/NuvioMobile/cmp-rewrite/store.json) in the app's Sources section, then install Nuvio.
+## 📖 Origen y Por Qué un Fork de Nuvio
 
-## Build from source
+**neXStream** nació como un fork de **Nuvio Mobile**, un reproductor multimedia de código abierto con una arquitectura excepcional.
+
+### ¿Por qué elegimos la base de Nuvio?
+* **Arquitectura de Interfaz de Primer Nivel:** Nuvio contaba con uno de los sistemas de UI más modernos del ecosistema Kotlin Multiplatform, utilizando Jetpack Compose con tokens de Material You, animaciones fluidas y un diseño adaptativo pensado tanto para pantallas táctiles como para control remoto en Android TV (D-pad).
+* **Motor de Reproducción Robusto:** Un pipeline multimedia maduro basado en ExoPlayer, con aceleración por hardware, soporte de subtítulos avanzados, cambio de pistas de audio y Picture-in-Picture (PiP).
+* **Sistema de Actualización In-App:** Un sistema nativo de auto-actualizaciones a través de la API de GitHub Releases, permitiendo distribuir la app directamente sin depender de tiendas cerradas.
+
+---
+
+## 🔄 Transformación: ¿Qué cambió respecto a Nuvio?
+
+Nuvio fue concebido originalmente como un agregador de medios con plugins externos, torrents y servicios debrid. En **neXStream** transformamos por completo esa visión para crear un **reproductor IPTV puro, veloz y especializado**:
+
+### ✂️ Lo que se removió
+* **Desmantelamiento de P2P y Debrid:** Se eliminaron por completo los motores de torrents (P2P), clientes debrid (Real-Debrid, TorBox, Premiumize) y el entorno de ejecución de plugins (JS/WASM).
+* **Eliminación de dependencias innecesarias:** Al retirar componentes no relacionados con IPTV, se redujo el consumo de batería, la sobrecarga en memoria y el peso del APK.
+
+### 🚀 Lo que se implementó
+* **Integración Nativa con Xtream Codes:** Soporte directo y completo para la API de Xtream Codes (Canales en Vivo, Películas VOD, Series por temporadas/episodios y EPG).
+* **Soporte para Listas M3U:** Parser optimizado para listas de reproducción en formato M3U/M3U8.
+* **Cajón de Canales en Vivo en Reproducción:** Panel lateral interactivo (`PlayerChannelsPanel`) que permite explorar categorías y cambiar de canal al instante sin interrumpir la transmisión en pantalla.
+* **Actualizaciones dedicadas de neXStream:** Reconfiguración total del sistema de actualizaciones para consultar directamente los releases de `NexDevStudios-repo/neXStream`.
+
+### ⚡ Lo que se mejoró y optimizó
+* **Afinamiento del Motor de Streaming:** Buffers y cachés de ExoPlayer optimizados para flujos HLS y MPEG-TS típicos de IPTV, reduciendo el retardo y el buffering inicial.
+* **Corrección de Cuadrículas y Pósters:** Ajuste de medidas y ratios de aspecto en las portadas de VOD para evitar distorsiones y espacios vacíos en distintas resoluciones.
+* **Interfaz y Temas Personalizados:** Integración de paletas temáticas dinámicas (Arctic Blue, Emerald, Rose Gold, Copper, Graphite) con soporte completo para Material Design 3 Expressive.
+
+---
+
+## ✨ Características Principales
+
+- 📡 **Xtream Codes & M3U:** Conexión directa a tus servidores IPTV con soporte de credenciales seguras.
+- 📺 **TV en Vivo & VOD Separados:** Catálogos independientes con navegación organizada por categorías.
+- 🎨 **Material You & Jetpack Compose:** Interfaz moderna que se adapta a los colores de tu sistema.
+- ⚡ **ExoPlayer con Aceleración Hardware:** Calidad óptima y bajo consumo de recursos.
+- 🔄 **Actualizador Integrado:** Alerta y descarga de nuevas versiones directamente desde GitHub.
+- 🔒 **100% Privado:** Tu contenido, tus servidores. Sin telemetría invasiva ni anuncios.
+
+---
+
+## 📥 Instalación
+
+Descarga el último APK desde la sección de **[Releases](https://github.com/NexDevStudios-repo/neXStream/releases)**:
+
+1. Descarga el archivo `.apk` correspondiente a tu dispositivo (o la versión universal).
+2. Instálalo permitiendo fuentes desconocidas si tu sistema lo solicita.
+3. Abre la app e ingresa la URL y credenciales de tu servicio Xtream Codes.
+
+---
+
+## 🛠️ Compilación desde el código fuente
+
+Requiere JDK 17 y Android SDK:
 
 ```bash
-git clone https://github.com/NuvioMedia/NuvioMobile.git
-cd NuvioMobile
+git clone https://github.com/NexDevStudios-repo/neXStream.git
+cd neXStream
+./gradlew :androidApp:assembleFullRelease
 ```
 
-### Android
+---
 
-Android development requires Android Studio and the Android SDK.
+## 🌐 Comunidad y Soporte Oficial
 
-```bash
-./gradlew :androidApp:assembleFullDebug
-```
+* 📸 **Instagram:** [@nexdevstudios_](https://instagram.com/nexdevstudios_)
+* ✖️ **X (Twitter):** [@nexdevstudios_](https://x.com/nexdevstudios_)
+* 💬 **Canal Oficial de Telegram:** [Unirse al canal](https://t.me/+C_ZyoLwgMi1iNjRh)
+* ✉️ **Correo de Soporte:** [soportenexdevstudiosoficial@gmail.com](mailto:soportenexdevstudiosoficial@gmail.com)
 
-### iOS
+---
 
-iOS development requires macOS and Xcode.
+## 📄 Licencia y Atribución
 
-```bash
-env NUVIO_IOS_DISTRIBUTION=full xcodebuild \
-  -project iosApp/iosApp.xcodeproj \
-  -scheme iosApp \
-  -configuration Debug \
-  -sdk iphonesimulator \
-  -derivedDataPath build/ios-derived-full-simulator \
-  CODE_SIGNING_ALLOWED=NO \
-  build
-```
-
-The shared app is built with Kotlin Multiplatform and Compose Multiplatform.
-
-## License
-
-[GNU General Public License v3.0](./LICENSE)
+Este proyecto es software libre bajo la licencia **GNU General Public License v3.0** ([GPL-3.0](./LICENSE)).  
+Para detalles sobre créditos al proyecto original Nuvio, consulta [NOTICE.md](./NOTICE.md).
