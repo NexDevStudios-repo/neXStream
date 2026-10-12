@@ -14,9 +14,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Shuffle
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Shuffle
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -115,7 +115,7 @@ internal fun EpisodeShuffleSheet(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (preview != null) {
                     TextButton(enabled = !starting, onClick = { selected = null }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.action_back))
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(Res.string.action_back))
                     }
                 }
                 Column {
@@ -156,7 +156,7 @@ internal fun EpisodeShuffleSheet(
                             contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                     } else {
                         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(if (hidden) Icons.Default.VisibilityOff else Icons.Default.Shuffle,
+                            Icon(if (hidden) Icons.Rounded.VisibilityOff else Icons.Rounded.Shuffle,
                                 contentDescription = null, modifier = Modifier.size(32.dp))
                             if (hidden) Text(stringResource(Res.string.shuffle_artwork_hidden), style = MaterialTheme.typography.bodySmall)
                         }
@@ -195,7 +195,7 @@ internal fun EpisodeShuffleSheet(
                 if ((readyPicker?.count(includeWatched) ?: 0) > 1) {
                     OutlinedButton(enabled = !starting, onClick = { selected = readyPicker?.pick(includeWatched) },
                         modifier = Modifier.fillMaxWidth()) {
-                        Icon(Icons.Default.Shuffle, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Rounded.Shuffle, contentDescription = null, modifier = Modifier.size(18.dp))
                         Text(stringResource(Res.string.shuffle_again), modifier = Modifier.padding(start = 8.dp))
                     }
                 } else Text(stringResource(Res.string.shuffle_only_episode), style = MaterialTheme.typography.bodySmall)

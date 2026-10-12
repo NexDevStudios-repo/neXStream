@@ -1,7 +1,6 @@
 package com.nuvio.app.features.home
 
 import androidx.compose.ui.text.intl.Locale
-import com.nuvio.app.features.addons.ManagedAddon
 import com.nuvio.app.features.collection.Collection
 import com.nuvio.app.features.collection.CollectionRepository
 import kotlinx.atomicfu.atomic
@@ -34,6 +33,9 @@ data class HomeCatalogSettingsItem(
 
 data class HomeCatalogSettingsUiState(
     val heroEnabled: Boolean = true,
+    val liveStreamsEnabled: Boolean = true,
+    val vodEnabled: Boolean = true,
+    val seriesEnabled: Boolean = true,
     val showCatalogType: Boolean = true,
     val hideUnreleasedContent: Boolean = false,
     val items: List<HomeCatalogSettingsItem> = emptyList(),
@@ -41,6 +43,12 @@ data class HomeCatalogSettingsUiState(
     val signature: String
         get() = buildString {
             append(heroEnabled)
+            append('|')
+            append(liveStreamsEnabled)
+            append('|')
+            append(vodEnabled)
+            append('|')
+            append(seriesEnabled)
             append('|')
             append(showCatalogType)
             append('|')
@@ -80,6 +88,9 @@ private data class StoredHomeCatalogPreference(
 @Serializable
 private data class StoredHomeCatalogSettingsPayload(
     val heroEnabled: Boolean = true,
+    val liveStreamsEnabled: Boolean = true,
+    val vodEnabled: Boolean = true,
+    val seriesEnabled: Boolean = true,
     val showCatalogType: Boolean = true,
     val hideUnreleasedContent: Boolean = false,
     val items: List<StoredHomeCatalogPreference> = emptyList(),
@@ -99,7 +110,6 @@ object HomeCatalogSettingsRepository {
     private var hasLoaded = false
     private var definitions: List<HomeCatalogDefinition> = emptyList()
     private var collectionDefinitions: List<CollectionCatalogDefinition> = emptyList()
-    private var lastCatalogSync: Triple<List<ManagedAddon>, List<Collection>, String>? = null
     private var lastCollectionSync: Pair<List<Collection>, String>? = null
     private val preferencesRef = atomic<Map<String, StoredHomeCatalogPreference>>(emptyMap())
     private var preferences: Map<String, StoredHomeCatalogPreference>
@@ -108,6 +118,9 @@ object HomeCatalogSettingsRepository {
             preferencesRef.value = value
         }
     private var heroEnabled = true
+    private var liveStreamsEnabled = true
+    private var vodEnabled = true
+    private var seriesEnabled = true
     private var showCatalogType = true
     private var hideUnreleasedContent = false
 
@@ -115,11 +128,13 @@ object HomeCatalogSettingsRepository {
         hasLoaded = false
         preferences = emptyMap()
         heroEnabled = true
+        liveStreamsEnabled = true
+        vodEnabled = true
+        seriesEnabled = true
         showCatalogType = true
         hideUnreleasedContent = false
         definitions = emptyList()
         collectionDefinitions = emptyList()
-        lastCatalogSync = null
         lastCollectionSync = null
         _uiState.value = HomeCatalogSettingsUiState()
     }
@@ -128,34 +143,15 @@ object HomeCatalogSettingsRepository {
         hasLoaded = false
         definitions = emptyList()
         collectionDefinitions = emptyList()
-        lastCatalogSync = null
         lastCollectionSync = null
         preferences = emptyMap()
         heroEnabled = true
+        liveStreamsEnabled = true
+        vodEnabled = true
+        seriesEnabled = true
         showCatalogType = true
         hideUnreleasedContent = false
         _uiState.value = HomeCatalogSettingsUiState()
-    }
-
-    fun syncCatalogs(addons: List<ManagedAddon>) {
-        ensureLoaded()
-        val collections = CollectionRepository.collections.value
-        val syncInput = Triple(addons, collections, Locale.current.toLanguageTag())
-        if (lastCatalogSync == syncInput) return
-        definitions = buildHomeCatalogDefinitions(addons)
-        collectionDefinitions = buildCollectionDefinitions(collections)
-        lastCatalogSync = syncInput
-        lastCollectionSync = lastCollectionSync?.takeIf {
-            it.first == collections && it.second == syncInput.third
-        }
-        if (definitions.isEmpty() && collectionDefinitions.isEmpty()) {
-            publish()
-            return
-        }
-        normalizePreferences()
-        enforcePinnedCollectionsAtTop()
-        publish()
-        persist()
     }
 
     fun syncCollections(collections: List<Collection>) {
@@ -163,9 +159,6 @@ object HomeCatalogSettingsRepository {
         val syncInput = collections to Locale.current.toLanguageTag()
         if (lastCollectionSync == syncInput) return
         collectionDefinitions = buildCollectionDefinitions(collections)
-        lastCatalogSync = lastCatalogSync?.takeIf {
-            it.second == collections && it.third == syncInput.second
-        }
         lastCollectionSync = syncInput
         normalizePreferences()
         enforcePinnedCollectionsAtTop()
@@ -197,6 +190,33 @@ object HomeCatalogSettingsRepository {
         publish()
         persist()
         HomeRepository.applyCurrentSettings()
+    }
+
+    fun setLiveStreamsEnabled(enabled: Boolean) {
+        ensureLoaded()
+        if (liveStreamsEnabled == enabled) return
+        liveStreamsEnabled = enabled
+        publish()
+        persist()
+        HomeRepository.refreshXtream(force = true)
+    }
+
+    fun setVodEnabled(enabled: Boolean) {
+        ensureLoaded()
+        if (vodEnabled == enabled) return
+        vodEnabled = enabled
+        publish()
+        persist()
+        HomeRepository.refreshXtream(force = true)
+    }
+
+    fun setSeriesEnabled(enabled: Boolean) {
+        ensureLoaded()
+        if (seriesEnabled == enabled) return
+        seriesEnabled = enabled
+        publish()
+        persist()
+        HomeRepository.refreshXtream(force = true)
     }
 
     fun setShowCatalogType(enabled: Boolean) {
@@ -297,6 +317,9 @@ object HomeCatalogSettingsRepository {
 
         if (parsedPayload != null) {
             heroEnabled = parsedPayload.heroEnabled
+            liveStreamsEnabled = parsedPayload.liveStreamsEnabled
+            vodEnabled = parsedPayload.vodEnabled
+            seriesEnabled = parsedPayload.seriesEnabled
             showCatalogType = parsedPayload.showCatalogType
             hideUnreleasedContent = parsedPayload.hideUnreleasedContent
             preferences = parsedPayload.items.associateBy { it.key }
@@ -397,6 +420,9 @@ object HomeCatalogSettingsRepository {
 
         _uiState.value = HomeCatalogSettingsUiState(
             heroEnabled = heroEnabled,
+            liveStreamsEnabled = liveStreamsEnabled,
+            vodEnabled = vodEnabled,
+            seriesEnabled = seriesEnabled,
             showCatalogType = showCatalogType,
             hideUnreleasedContent = hideUnreleasedContent,
             items = items,
@@ -408,6 +434,9 @@ object HomeCatalogSettingsRepository {
             json.encodeToString(
                 StoredHomeCatalogSettingsPayload(
                     heroEnabled = heroEnabled,
+                    liveStreamsEnabled = liveStreamsEnabled,
+                    vodEnabled = vodEnabled,
+                    seriesEnabled = seriesEnabled,
                     showCatalogType = showCatalogType,
                     hideUnreleasedContent = hideUnreleasedContent,
                     items = preferences.values.sortedBy { it.order },

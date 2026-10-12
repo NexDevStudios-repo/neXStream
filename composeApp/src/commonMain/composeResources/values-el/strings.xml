@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="about_supporters_contributors_subtitle">Δημόσια αναγνώριση και συντελεστές του έργου</string>
     <string name="action_back">Πίσω</string>
@@ -124,7 +124,7 @@
     <string name="collections_pinned">Καρφιτσωμένα</string>
     <string name="collections_tab_all">Όλα</string>
     <string name="collections_your_collections">Οι συλλογές σας</string>
-    <string name="compose_about_made_with">Φτιαγμένο με ❤️ από την Tapframe και φίλους</string>
+    <string name="compose_about_made_with">Φτιαγμένο με ❤️ από την Nex Dev Studios και φίλους</string>
     <string name="compose_about_version_format">Έκδοση %1$s (%2$s)</string>
     <string name="compose_action_off">Απενεργοποίηση</string>
     <string name="compose_action_on">Ενεργοποίηση</string>

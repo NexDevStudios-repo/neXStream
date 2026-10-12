@@ -36,6 +36,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -454,15 +455,15 @@ private fun SeasonViewModeToggle(
     val isPosters = mode == SeasonViewMode.Posters
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .border(
                 width = 1.dp,
-                color = Color.White.copy(alpha = 0.2f),
-                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.outlineVariant,
+                shape = CircleShape,
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 6.dp),
+            .padding(horizontal = 12.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -475,7 +476,7 @@ private fun SeasonViewModeToggle(
                 fontSize = sizing.seasonToggleTextSize,
                 fontWeight = FontWeight.SemiBold,
             ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.onSurface,
         )
     }
 }
@@ -517,13 +518,18 @@ private fun SeasonTextChipScrollRow(
             val isSelected = season == currentSeason
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(sizing.seasonChipRadius))
+                    .clip(CircleShape)
                     .background(
                         if (isSelected) {
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                            MaterialTheme.colorScheme.primaryContainer
                         } else {
-                            Color.Transparent
+                            MaterialTheme.colorScheme.surfaceContainerHigh
                         },
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                        shape = CircleShape,
                     )
                     .combinedClickable(
                         onClick = { onSelect(season) },
@@ -542,7 +548,7 @@ private fun SeasonTextChipScrollRow(
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
                     ),
                     color = if (isSelected) {
-                        MaterialTheme.colorScheme.onBackground
+                        MaterialTheme.colorScheme.onPrimaryContainer
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
                     },
@@ -1188,10 +1194,10 @@ private fun EpisodeListCard(
             .fillMaxWidth()
             .height(sizing.cardHeight)
             .clip(cardShape)
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
             .border(
                 width = 1.dp,
-                color = Color.White.copy(alpha = 0.1f),
+                color = MaterialTheme.colorScheme.outlineVariant,
                 shape = cardShape,
             )
             .combinedClickable(

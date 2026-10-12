@@ -19,14 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.nuvio.app.features.debrid.DebridSettingsRepository
 import com.nuvio.app.features.streams.LocalStreamSizeLabelFormat
 import com.nuvio.app.features.streams.StreamBadgeSettingsRepository
 import com.nuvio.app.features.streams.StreamCard
 import com.nuvio.app.features.streams.StreamCardSkeleton
 import com.nuvio.app.features.streams.StreamItem
 import com.nuvio.app.features.streams.StreamsUiState
-import com.nuvio.app.features.streams.isSelectableForPlayback
 import com.nuvio.app.features.streams.rememberStreamSizeLabelFormat
 import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.compose_player_no_streams_found
@@ -47,10 +45,6 @@ internal fun PlayerStreamList(
     currentStreamName: String? = null,
     currentLabel: String? = null,
 ) {
-    val debridSettings by remember {
-        DebridSettingsRepository.ensureLoaded()
-        DebridSettingsRepository.uiState
-    }.collectAsStateWithLifecycle()
     val streamBadgeSettings by remember {
         StreamBadgeSettingsRepository.ensureLoaded()
         StreamBadgeSettingsRepository.uiState
@@ -90,34 +84,33 @@ internal fun PlayerStreamList(
             val streamKeys = remember(streams) { streams.stablePlayerKeys() }
             val formatStreamSize = rememberStreamSizeLabelFormat()
             CompositionLocalProvider(LocalStreamSizeLabelFormat provides formatStreamSize) {
-            LazyColumn(
-                modifier = modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = contentPadding,
-            ) {
-                itemsIndexed(
-                    items = streams,
-                    key = { index, _ -> streamKeys[index] },
-                ) { _, stream ->
-                    StreamCard(
-                        stream = stream,
-                        enabled = stream.isSelectableForPlayback(debridSettings.canResolvePlayableLinks),
-                        appendInstantServiceToDefaultName = debridSettings.canResolvePlayableLinks &&
-                            !debridSettings.hasCustomStreamFormatting,
-                        showFileSizeBadges = streamBadgeSettings.showFileSizeBadges,
-                        showAddonLogo = streamBadgeSettings.showAddonLogo,
-                        badgePlacement = streamBadgeSettings.badgePlacement,
-                        isCurrent = stream.isCurrentPlayerStream(currentStreamUrl, currentStreamName),
-                        currentLabel = currentLabel,
-                        onClick = { onStreamSelected(stream) },
-                    )
-                }
-                if (streamsUiState.isAnyLoading) {
-                    item {
-                        StreamCardSkeleton()
+                LazyColumn(
+                    modifier = modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = contentPadding,
+                ) {
+                    itemsIndexed(
+                        items = streams,
+                        key = { index, _ -> streamKeys[index] },
+                    ) { _, stream ->
+                        StreamCard(
+                            stream = stream,
+                            enabled = true,
+                            appendInstantServiceToDefaultName = false,
+                            showFileSizeBadges = streamBadgeSettings.showFileSizeBadges,
+                            showAddonLogo = streamBadgeSettings.showAddonLogo,
+                            badgePlacement = streamBadgeSettings.badgePlacement,
+                            isCurrent = stream.isCurrentPlayerStream(currentStreamUrl, currentStreamName),
+                            currentLabel = currentLabel,
+                            onClick = { onStreamSelected(stream) },
+                        )
+                    }
+                    if (streamsUiState.isAnyLoading) {
+                        item {
+                            StreamCardSkeleton()
+                        }
                     }
                 }
-            }
             }
         }
     }

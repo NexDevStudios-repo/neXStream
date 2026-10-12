@@ -75,14 +75,13 @@ private fun SettingsCard(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val tokens = MaterialTheme.nuvio
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = tokens.colors.surface,
-        shape = if (isTablet) RoundedCornerShape(NuvioTokens.Radius.xl) else tokens.shapes.compactCard,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = RoundedCornerShape(if (isTablet) 24.dp else 20.dp),
         border = BorderStroke(
-            tokens.borders.hairline,
-            tokens.colors.borderSubtle,
+            1.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
         ),
     ) {
         Column(content = content)
@@ -105,11 +104,10 @@ internal fun SettingsGroup(
 
 @Composable
 internal fun SettingsGroupDivider(isTablet: Boolean) {
-    val tokens = MaterialTheme.nuvio
     HorizontalDivider(
-        modifier = Modifier.padding(start = if (isTablet) NuvioTokens.Space.s80 - NuvioTokens.Space.s2 else NuvioTokens.Space.s64 + NuvioTokens.Space.s2),
-        thickness = tokens.borders.hairline,
-        color = tokens.colors.borderSubtle,
+        modifier = Modifier.padding(start = if (isTablet) 78.dp else 66.dp),
+        thickness = 1.dp,
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
     )
 }
 

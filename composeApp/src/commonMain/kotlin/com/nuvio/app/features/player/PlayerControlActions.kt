@@ -17,8 +17,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
+import androidx.compose.material.icons.rounded.Bookmark
+import androidx.compose.material.icons.rounded.BookmarkBorder
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Flag
+import androidx.compose.material.icons.rounded.LiveTv
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockOpen
 import androidx.compose.material.icons.rounded.SkipNext
@@ -55,12 +58,22 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 internal fun PlayerToolbar(
     isLocked: Boolean,
+    isFavorite: Boolean = false,
+    onToggleFavorite: (() -> Unit)? = null,
     onLockToggle: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Spacer(Modifier.weight(1f))
+        if (onToggleFavorite != null) {
+            PlayerAction(
+                description = if (isFavorite) "Quitar de favoritos" else "Agregar a favoritos",
+                icon = if (isFavorite) Icons.Rounded.Bookmark else Icons.Rounded.BookmarkBorder,
+                tint = if (isFavorite) MaterialTheme.colorScheme.primary else Color.White,
+                onClick = onToggleFavorite,
+            )
+        }
         PlayerAction(
             description = stringResource(
                 if (isLocked) Res.string.compose_player_unlock_controls else Res.string.compose_player_lock_controls,
@@ -91,6 +104,7 @@ internal fun PlayerControlActions(
     onAudioClick: () -> Unit,
     onSourcesClick: (() -> Unit)?,
     onEpisodesClick: (() -> Unit)?,
+    onChannelsClick: (() -> Unit)? = null,
     onNextEpisodeClick: (() -> Unit)?,
     onSpeedClick: () -> Unit,
     onResizeModeClick: () -> Unit,
@@ -100,6 +114,12 @@ internal fun PlayerControlActions(
     onInteraction: () -> Unit,
 ) {
     val actions = listOfNotNull(
+        onChannelsClick?.let {
+            PlayerControlAction(
+                "Canales", it,
+                icon = Icons.Rounded.LiveTv,
+            )
+        },
         onNextEpisodeClick?.let {
             PlayerControlAction(
                 stringResource(Res.string.player_next_episode), it,
@@ -180,6 +200,7 @@ internal fun PlayerControlActions(
                         icon = action.icon,
                         painter = action.painter,
                         iconSize = action.iconSize,
+                        tint = action.tint,
                     )
                 }
                 if (hasOverflow) {
@@ -226,12 +247,13 @@ private fun PlayerAction(
     icon: ImageVector? = null,
     painter: Painter? = null,
     iconSize: Dp = 24.dp,
+    tint: Color = Color.White,
 ) {
     IconButton(onClick = onClick, modifier = Modifier.size(48.dp)) {
         if (painter != null) {
-            Icon(painter, description, tint = Color.White, modifier = Modifier.size(iconSize))
+            Icon(painter, description, tint = tint, modifier = Modifier.size(iconSize))
         } else if (icon != null) {
-            Icon(icon, description, tint = Color.White, modifier = Modifier.size(iconSize))
+            Icon(icon, description, tint = tint, modifier = Modifier.size(iconSize))
         }
     }
 }
@@ -242,4 +264,5 @@ private data class PlayerControlAction(
     val icon: ImageVector? = null,
     val painter: Painter? = null,
     val iconSize: Dp = 24.dp,
+    val tint: Color = Color.White,
 )

@@ -16,8 +16,8 @@ internal fun routeProfileSelection(
 ) {
     when {
         isEditMode -> onEditProfile(profile)
-        profile.profileIndex == activeProfileIndex -> onActiveProfileSelected(profile)
         profile.pinEnabled -> onPinRequired(profile)
+        activeProfileIndex != null && profile.profileIndex == activeProfileIndex -> onActiveProfileSelected(profile)
         else -> onProfileSelected(profile)
     }
 }

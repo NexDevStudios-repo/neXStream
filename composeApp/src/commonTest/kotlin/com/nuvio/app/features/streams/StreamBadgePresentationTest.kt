@@ -1,6 +1,5 @@
 package com.nuvio.app.features.streams
 
-import com.nuvio.app.features.debrid.DebridProviders
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -103,8 +102,8 @@ class StreamBadgePresentationTest {
             addonName = "Addon",
             addonId = "addon:test",
             debridCacheStatus = StreamDebridCacheStatus(
-                providerId = DebridProviders.TORBOX_ID,
-                providerName = DebridProviders.Torbox.displayName,
+                providerId = "torbox",
+                providerName = "TorBox",
                 state = StreamDebridCacheState.CACHED,
                 cachedName = "Movie.2026.TrueHD.7.1-GRP.mkv",
             ),

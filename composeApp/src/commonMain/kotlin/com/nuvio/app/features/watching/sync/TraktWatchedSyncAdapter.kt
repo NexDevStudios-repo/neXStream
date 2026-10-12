@@ -1,8 +1,8 @@
-package com.nuvio.app.features.watching.sync
+﻿package com.nuvio.app.features.watching.sync
 
 import co.touchlab.kermit.Logger
-import com.nuvio.app.features.addons.RawHttpResponse
-import com.nuvio.app.features.addons.httpRequestRaw
+import com.nuvio.app.core.network.RawHttpResponse
+import com.nuvio.app.core.network.httpRequestRaw
 import com.nuvio.app.features.tmdb.TmdbService
 import com.nuvio.app.features.tracking.TrackingProviderId
 import com.nuvio.app.features.tracking.TrackingWatchedProvider

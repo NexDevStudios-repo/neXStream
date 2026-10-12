@@ -382,13 +382,18 @@ private fun ExoPlayerSurface(
             setParameters(parameters)
         }
 
+        val iptvBufferSeconds = com.nuvio.app.features.xtream.XtreamPreferencesRepository.state.value.bufferSeconds
+        val bufferForPlaybackMs = if (iptvBufferSeconds > 0) iptvBufferSeconds * 1000 else 500
+        val minBufferMs = maxOf(bufferForPlaybackMs * 2, DefaultLoadControl.DEFAULT_MIN_BUFFER_MS)
+        val maxBufferMs = maxOf(minBufferMs + 15_000, 50_000)
+
         val loadControl = DefaultLoadControl.Builder()
             .setBackBuffer(10_000, true)
             .setBufferDurationsMs(
-                DefaultLoadControl.DEFAULT_MIN_BUFFER_MS,
-                50_000,
-                DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS,
-                DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS
+                minBufferMs,
+                maxBufferMs,
+                bufferForPlaybackMs,
+                bufferForPlaybackMs
             )
             .build()
 
@@ -1295,6 +1300,14 @@ private class NuvioLibmpvView(
         mpv.setOptionString("demuxer-max-bytes", "${libmpvCacheBytes()}").logIfMpvError("demuxer-max-bytes")
         mpv.setOptionString("demuxer-max-back-bytes", "${libmpvCacheBytes()}").logIfMpvError("demuxer-max-back-bytes")
         mpv.setOptionString("vd-lavc-film-grain", "cpu")
+        val iptvBufferSeconds = com.nuvio.app.features.xtream.XtreamPreferencesRepository.state.value.bufferSeconds
+        if (iptvBufferSeconds > 0) {
+            mpv.setOptionString("demuxer-readahead-secs", "$iptvBufferSeconds")
+        }
+        val customUa = com.nuvio.app.features.xtream.XtreamPreferencesRepository.state.value.userAgent
+        if (customUa.isNotBlank()) {
+            mpv.setOptionString("user-agent", customUa)
+        }
         mpv.setPropertyBoolean("keep-open", true)
         mpv.setPropertyBoolean("input-default-bindings", true)
         mpv.setPropertyBoolean("audio-fallback-to-null", true)

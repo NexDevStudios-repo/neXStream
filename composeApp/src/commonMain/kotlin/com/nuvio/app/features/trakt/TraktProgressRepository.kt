@@ -1,8 +1,8 @@
-package com.nuvio.app.features.trakt
+﻿package com.nuvio.app.features.trakt
 
 import co.touchlab.kermit.Logger
-import com.nuvio.app.features.addons.httpGetTextWithHeaders
-import com.nuvio.app.features.addons.httpRequestRaw
+import com.nuvio.app.core.network.httpGetTextWithHeaders
+import com.nuvio.app.core.network.httpRequestRaw
 import com.nuvio.app.features.details.MetaDetails
 import com.nuvio.app.features.details.MetaDetailsRepository
 import com.nuvio.app.features.tmdb.TmdbService
@@ -1534,7 +1534,7 @@ object TraktProgressRepository {
     private fun Int.pad2(): String = if (this < 10) "0$this" else "$this"
     private fun Int.pad4(): String = toString().padStart(4, '0')
 
-    private fun com.nuvio.app.features.addons.RawHttpResponse.headerInt(name: String): Int? =
+    private fun com.nuvio.app.core.network.RawHttpResponse.headerInt(name: String): Int? =
         headers[name.lowercase()]
             ?.substringBefore(',')
             ?.trim()

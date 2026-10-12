@@ -73,10 +73,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import coil3.compose.AsyncImage
 import com.nuvio.app.core.ui.nuvioSafeBottomPadding
 import com.nuvio.app.core.ui.shimmer
-import com.nuvio.app.features.debrid.DebridSettingsRepository
-import com.nuvio.app.features.debrid.DirectDebridPlayableResult
-import com.nuvio.app.features.debrid.DirectDebridPlaybackResolver
-import com.nuvio.app.features.debrid.toastMessage
 import com.nuvio.app.features.player.PlayerSettingsRepository
 import com.nuvio.app.features.watchprogress.WatchProgressRepository
 import com.nuvio.app.features.watchprogress.WatchProgressEntry
@@ -131,10 +127,7 @@ fun StreamsScreen(
         PlayerSettingsRepository.ensureLoaded()
         PlayerSettingsRepository.uiState
     }.collectAsStateWithLifecycle()
-    val debridSettings by remember {
-        DebridSettingsRepository.ensureLoaded()
-        DebridSettingsRepository.uiState
-    }.collectAsStateWithLifecycle()
+
     val watchProgressUiState by remember {
         WatchProgressRepository.ensureLoaded()
         WatchProgressRepository.uiState
@@ -244,8 +237,8 @@ fun StreamsScreen(
                 episodeNumber = episodeNumber,
                 episodeTitle = episodeTitle,
                 uiState = uiState,
-                debridEnabled = debridSettings.canResolvePlayableLinks,
-                appendInstantServiceToDefaultName = debridSettings.canResolvePlayableLinks && !debridSettings.hasCustomStreamFormatting,
+                debridEnabled = false,
+                appendInstantServiceToDefaultName = false,
                 resumePositionMs = effectiveResumePositionMs,
                 resumeProgressFraction = effectiveResumeProgressFraction,
                 onStreamSelected = { stream, positionMs, progressFraction ->
@@ -266,8 +259,8 @@ fun StreamsScreen(
                 episodeTitle = episodeTitle,
                 blurEpisodeThumbnail = blurEpisodeThumbnail,
                 uiState = uiState,
-                debridEnabled = debridSettings.canResolvePlayableLinks,
-                appendInstantServiceToDefaultName = debridSettings.canResolvePlayableLinks && !debridSettings.hasCustomStreamFormatting,
+                debridEnabled = false,
+                appendInstantServiceToDefaultName = false,
                 resumePositionMs = effectiveResumePositionMs,
                 resumeProgressFraction = effectiveResumeProgressFraction,
                 onStreamSelected = { stream, positionMs, progressFraction ->
@@ -304,88 +297,27 @@ fun StreamsScreen(
                 if (!directUrl.isNullOrBlank()) {
                     clipboardManager.setText(AnnotatedString(directUrl))
                     NuvioToastController.show(streamLinkCopiedText)
-                } else if (DirectDebridPlaybackResolver.shouldResolveToPlayableStream(stream)) {
-                    downloadScope.launch {
-                        val resolved = DirectDebridPlaybackResolver.resolveToPlayableStream(
-                            stream = stream,
-                            season = seasonNumber,
-                            episode = episodeNumber,
-                        )
-                        when (resolved) {
-                            is DirectDebridPlayableResult.Success -> {
-                                val resolvedUrl = resolved.stream.playableDirectUrl
-                                if (!resolvedUrl.isNullOrBlank()) {
-                                    clipboardManager.setText(AnnotatedString(resolvedUrl))
-                                    NuvioToastController.show(streamLinkCopiedText)
-                                } else {
-                                    NuvioToastController.show(noDirectStreamLinkText)
-                                }
-                            }
-                            else -> {
-                                val message = resolved.toastMessage()
-                                if (message != null) {
-                                    NuvioToastController.show(message)
-                                }
-                            }
-                        }
-                    }
                 } else {
                     NuvioToastController.show(noDirectStreamLinkText)
                 }
             },
             onDownload = { stream ->
-                if (DirectDebridPlaybackResolver.shouldResolveToPlayableStream(stream)) {
-                    downloadScope.launch {
-                        val resolved = DirectDebridPlaybackResolver.resolveToPlayableStream(
-                            stream = stream,
-                            season = seasonNumber,
-                            episode = episodeNumber,
-                        )
-                        when (resolved) {
-                            is DirectDebridPlayableResult.Success -> {
-                                val result = DownloadsRepository.enqueueFromStream(
-                                    contentType = type,
-                                    videoId = videoId,
-                                    parentMetaId = parentMetaId,
-                                    parentMetaType = parentMetaType,
-                                    title = title,
-                                    logo = logo,
-                                    poster = poster,
-                                    background = background,
-                                    seasonNumber = seasonNumber,
-                                    episodeNumber = episodeNumber,
-                                    episodeTitle = episodeTitle,
-                                    episodeThumbnail = episodeThumbnail,
-                                    stream = resolved.stream,
-                                )
-                                NuvioToastController.show(result.toastMessage())
-                            }
-                            else -> {
-                                val message = resolved.toastMessage()
-                                if (message != null) {
-                                    NuvioToastController.show(message)
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    val result = DownloadsRepository.enqueueFromStream(
-                        contentType = type,
-                        videoId = videoId,
-                        parentMetaId = parentMetaId,
-                        parentMetaType = parentMetaType,
-                        title = title,
-                        logo = logo,
-                        poster = poster,
-                        background = background,
-                        seasonNumber = seasonNumber,
-                        episodeNumber = episodeNumber,
-                        episodeTitle = episodeTitle,
-                        episodeThumbnail = episodeThumbnail,
-                        stream = stream,
-                    )
-                    NuvioToastController.show(result.toastMessage())
-                }
+                val result = DownloadsRepository.enqueueFromStream(
+                    contentType = type,
+                    videoId = videoId,
+                    parentMetaId = parentMetaId,
+                    parentMetaType = parentMetaType,
+                    title = title,
+                    logo = logo,
+                    poster = poster,
+                    background = background,
+                    seasonNumber = seasonNumber,
+                    episodeNumber = episodeNumber,
+                    episodeTitle = episodeTitle,
+                    episodeThumbnail = episodeThumbnail,
+                    stream = stream,
+                )
+                NuvioToastController.show(result.toastMessage())
             },
             onOpen = { stream, openExternally ->
                 onStreamActionOpen(
@@ -1115,8 +1047,8 @@ private fun EmptyStateBlock(
     when (reason) {
         StreamsEmptyStateReason.NoAddonsInstalled,
         StreamsEmptyStateReason.NoCompatibleAddons -> {
-            title = stringResource(Res.string.playback_unavailable)
-            message = stringResource(Res.string.playback_unavailable_message)
+            title = "Transmisión no disponible"
+            message = "No se pudo obtener el stream del servidor IPTV. Verifica que el canal o contenido esté activo en tu servidor."
         }
 
         StreamsEmptyStateReason.StreamFetchFailed -> {

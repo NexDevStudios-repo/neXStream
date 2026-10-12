@@ -15,8 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -144,7 +144,7 @@ private fun ThemeChip(
             ) {
                 if (isSelected || theme == AppTheme.CUSTOM) {
                     Icon(
-                        imageVector = if (isSelected) Icons.Default.Check else Icons.Default.Edit,
+                        imageVector = if (isSelected) Icons.Rounded.Check else Icons.Rounded.Edit,
                         contentDescription = stringResource(
                             if (isSelected) Res.string.cd_selected else Res.string.custom_theme_edit,
                         ),

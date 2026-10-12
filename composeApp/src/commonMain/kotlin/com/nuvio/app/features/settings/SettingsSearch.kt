@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.CloudDownload
@@ -205,7 +205,7 @@ internal fun settingsSearchEntries(
         title = trackingPage,
         description = stringResource(Res.string.compose_settings_root_tracking_description),
         category = accountCategory,
-        icon = Icons.Default.Sync,
+        icon = Icons.Rounded.Sync,
     )
     addPage(
         page = SettingsPage.Appearance,
@@ -223,20 +223,11 @@ internal fun settingsSearchEntries(
         icon = Icons.Rounded.Tune,
     )
     addPage(
-        page = SettingsPage.ContentDiscovery,
-        key = "content-discovery",
-        title = contentDiscoveryPage,
+        page = SettingsPage.XtreamSources,
+        key = "xtream-sources",
+        title = stringResource(Res.string.compose_settings_page_addons),
         description = stringResource(Res.string.compose_settings_root_content_discovery_description),
         icon = Icons.Rounded.Extension,
-    )
-    addRow(
-        page = SettingsPage.ContentDiscovery,
-        key = "recent-searches",
-        title = stringResource(Res.string.settings_content_discovery_recent_searches),
-        description = stringResource(Res.string.settings_content_discovery_recent_searches_description),
-        pageLabel = contentDiscoveryPage,
-        section = stringResource(Res.string.settings_content_discovery_section_search),
-        icon = Icons.Rounded.Search,
     )
     addPage(
         page = SettingsPage.Playback,
@@ -446,28 +437,6 @@ internal fun settingsSearchEntries(
         icon = Icons.Rounded.Tune,
     )
 
-    addPage(
-        page = SettingsPage.Addons,
-        key = "addons",
-        title = addonsPage,
-        description = stringResource(
-            if (personalMediaAddonCopyEnabled) {
-                Res.string.settings_content_discovery_addons_description_appstore
-            } else {
-                Res.string.settings_content_discovery_addons_description
-            },
-        ),
-        icon = Icons.Rounded.Extension,
-    )
-    if (pluginsEnabled) {
-        addPage(
-            page = SettingsPage.Plugins,
-            key = "plugins",
-            title = pluginsPage,
-            description = stringResource(Res.string.settings_content_discovery_plugins_description),
-            icon = Icons.Rounded.Hub,
-        )
-    }
     addPage(
         page = SettingsPage.Homescreen,
         key = "home-layout",

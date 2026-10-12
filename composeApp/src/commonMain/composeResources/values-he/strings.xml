@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="about_licenses_attributions_subtitle">מקורות מידע, תודות ורישיונות Android</string>
     <string name="about_supporters_contributors_subtitle">הכרה ציבורית וקרדיטים לפרויקט</string>
@@ -155,7 +155,7 @@
     <string name="collections_new">אוסף חדש</string>
     <string name="collections_pinned">נעוץ</string>
     <string name="collections_tab_all">הכל</string>
-    <string name="compose_about_made_with">נוצר באהבה ❤️ על ידי Tapframe וחברים</string>
+    <string name="compose_about_made_with">נוצר באהבה ❤️ על ידי Nex Dev Studios וחברים</string>
     <string name="compose_about_version_format">גרסה %1$s (%2$s)</string>
     <string name="compose_action_off">כבוי</string>
     <string name="compose_action_on">]פעיל</string>

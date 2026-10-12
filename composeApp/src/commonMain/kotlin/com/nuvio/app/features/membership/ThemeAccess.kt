@@ -11,8 +11,8 @@ private val supporterThemes = linkedMapOf(
     AppTheme.GRAPHITE to CosmeticEntitlement.GRAPHITE_THEME,
 )
 
-private val standardThemes = listOf(AppTheme.WHITE) + AppTheme.entries.filterNot {
-    it == AppTheme.WHITE || it == AppTheme.CUSTOM || it in supporterThemes
+private val standardThemes = listOf(AppTheme.MATERIAL_YOU, AppTheme.WHITE) + AppTheme.entries.filterNot {
+    it == AppTheme.MATERIAL_YOU || it == AppTheme.WHITE || it == AppTheme.CUSTOM || it in supporterThemes
 }
 
 fun availableAppThemes(entitlements: CosmeticEntitlements): List<AppTheme> {
@@ -20,7 +20,7 @@ fun availableAppThemes(entitlements: CosmeticEntitlements): List<AppTheme> {
         .filterValues(entitlements::includes)
         .keys
         .toList()
-    return supporter + AppTheme.CUSTOM + standardThemes
+    return listOf(AppTheme.MATERIAL_YOU) + supporter + AppTheme.CUSTOM + standardThemes.filterNot { it == AppTheme.MATERIAL_YOU }
 }
 
 fun resolveAppTheme(
@@ -28,11 +28,7 @@ fun resolveAppTheme(
     entitlements: CosmeticEntitlements,
 ): AppTheme {
     if (selectedTheme == null) {
-        return supporterThemes
-            .filterValues(entitlements::includes)
-            .keys
-            .firstOrNull()
-            ?: AppTheme.WHITE
+        return AppTheme.WHITE
     }
     return selectedTheme.takeIf { it in availableAppThemes(entitlements) } ?: AppTheme.WHITE
 }

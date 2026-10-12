@@ -60,6 +60,8 @@ internal fun Modifier.playerSurfaceDragGestures(
     clearLiveGestureFeedbackState: State<() -> Unit>,
     revealLockedOverlayState: State<() -> Unit>,
     commitHorizontalSeekState: State<(Long) -> Unit>,
+    isLiveState: State<Boolean>? = null,
+    onZapChannelState: State<((Boolean) -> Unit)?>? = null,
 ): Modifier =
     pointerInput(gestureController, layoutSize, sideGestureSystemEdgeExclusionPx, playbackGesturesEnabled) {
         if (!playbackGesturesEnabled) return@pointerInput
@@ -105,6 +107,7 @@ internal fun Modifier.playerSurfaceDragGestures(
 
             var totalDx = 0f
             var totalDy = 0f
+            var zapTriggered = false
             var gestureMode: PlayerGestureMode? = null
             var verticalGestureActivationDy = 0f
             val horizontalSeekBaselineMs = currentPositionMsState.value
@@ -134,8 +137,15 @@ internal fun Modifier.playerSurfaceDragGestures(
                             abs(totalDy) > verticalGestureActivationSlop &&
                             abs(totalDy) > abs(totalDx) * PlayerVerticalGestureDominanceRatio
 
+                    val isLive = isLiveState?.value == true
+                    val zapCallback = onZapChannelState?.value
                     gestureMode = when {
-                        horizontalDominant -> {
+                        isLive && verticalDominant && region == null && zapCallback != null -> {
+                            deactivateHoldToSpeedState.value()
+                            PlayerGestureMode.ZapChannel
+                        }
+
+                        !isLive && horizontalDominant -> {
                             deactivateHoldToSpeedState.value()
                             PlayerGestureMode.HorizontalSeek
                         }
@@ -194,6 +204,15 @@ internal fun Modifier.playerSurfaceDragGestures(
                             (-activeTotalDy / height) * PlayerVerticalGestureSensitivity
                         controller?.setVolume((initialVolume?.fraction ?: 0f) + gestureDeltaFraction)
                             ?.let(showVolumeFeedbackState.value)
+                    }
+
+                    PlayerGestureMode.ZapChannel -> {
+                        val zapThresholdPx = viewConfiguration.touchSlop * 3.5f
+                        if (!zapTriggered && abs(totalDy) >= zapThresholdPx) {
+                            zapTriggered = true
+                            val zapForward = totalDy < 0f
+                            onZapChannelState?.value?.invoke(zapForward)
+                        }
                     }
                 }
                 change.consume()

@@ -53,10 +53,21 @@ import nuvio.composeapp.generated.resources.community_membership_you_are
 import nuvio.composeapp.generated.resources.community_view_supporter_membership
 import org.jetbrains.compose.resources.stringResource
 
-private val CardColor = Color(0xFF07080B)
-private val PrimaryTextColor = Color(0xFFF6F7F9)
-private val SecondaryTextColor = Color.White.copy(alpha = 0.65f)
-private val TertiaryTextColor = Color.White.copy(alpha = 0.52f)
+private val CardColor: Color
+    @Composable
+    get() = MaterialTheme.colorScheme.surfaceContainerLow
+
+private val PrimaryTextColor: Color
+    @Composable
+    get() = MaterialTheme.colorScheme.onSurface
+
+private val SecondaryTextColor: Color
+    @Composable
+    get() = MaterialTheme.colorScheme.onSurfaceVariant
+
+private val TertiaryTextColor: Color
+    @Composable
+    get() = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f)
 
 @Composable
 internal fun SupporterMembershipCard(
@@ -70,7 +81,7 @@ internal fun SupporterMembershipCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(if (isTablet) 24.dp else 20.dp))
             .background(CardColor),
     ) {
         when {
@@ -504,4 +515,8 @@ private fun MembershipButton(
     ) {
         Text(label)
     }
+}
+
+private fun formatDonationDate(rawDate: String): String {
+    return rawDate.split("T").firstOrNull() ?: rawDate
 }

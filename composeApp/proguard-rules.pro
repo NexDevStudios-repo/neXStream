@@ -34,16 +34,6 @@
 -keep class com.nuvio.app.features.player.PlayerScreenKt { *; }
 -keep class com.nuvio.app.features.player.PlayerScreenKt$* { *; }
 
-# QuickJS plugin runtime is dynamic; keep runtime and app plugin classes.
--keep class com.dokar.quickjs.** { *; }
--keep class com.nuvio.app.features.plugins.** { *; }
-
-# P2P runtime and Nuvio Engine JNI bridge. Native libraries are not processed
-# by R8, but their Kotlin/JNI wrapper classes and method names must stay stable.
--keep class com.nuvio.app.features.p2p.** { *; }
--keep class com.nuvio.engine.** { *; }
--keep interface com.nuvio.engine.** { *; }
-
 -keep class androidx.work.impl.WorkDatabase_Impl { *; }
 
 # Media3 / ExoPlayer classes from local AAR decoders and stock modules.

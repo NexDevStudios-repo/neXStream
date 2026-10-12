@@ -1,4 +1,4 @@
-﻿<resources>
+<resources>
     <string name="about_licenses_attributions_subtitle">Adatforrások, köszönetnyilvánítások és platform licencek</string>
     <string name="about_supporters_contributors_subtitle">Támogatók elismerése és a projekt készítői</string>
     <string name="action_back">Vissza</string>
@@ -283,7 +283,7 @@
     <string name="collections_pinned">Kitűzött</string>
     <string name="collections_tab_all">Összes</string>
     <string name="collections_your_collections">Gyűjteményeid</string>
-    <string name="compose_about_made_with">Készítette ❤️-vel a Tapframe és barátai</string>
+    <string name="compose_about_made_with">Készítette ❤️-vel a Nex Dev Studios és barátai</string>
     <string name="compose_about_version_format">Verzió: %1$s (%2$s)</string>
     <string name="compose_action_off">Ki</string>
     <string name="compose_action_on">Be</string>

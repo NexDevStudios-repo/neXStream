@@ -134,14 +134,17 @@ object CatalogRepository {
         activeJob = scope.launch {
             runCatching {
                 when (val target = request.target) {
-                    is CatalogTarget.Addon -> fetchCatalogPage(
-                        manifestUrl = target.manifestUrl,
-                        type = target.contentType,
-                        catalogId = target.catalogId,
-                        genre = target.genre,
-                        skip = requestedSkip.takeIf { it > 0 },
-                        forceRefresh = forceRefresh,
-                    )
+                    is CatalogTarget.XtreamCategory -> {
+                        val items = com.nuvio.app.features.xtream.XtreamRepository.fetchCategoryItems(
+                            contentType = target.contentType,
+                            categoryId = target.categoryId,
+                        )
+                        CatalogPage(
+                            items = items,
+                            rawItemCount = items.size,
+                            nextSkip = null,
+                        )
+                    }
 
                     is CatalogTarget.CollectionSource -> fetchCollectionSourcePage(
                         target = target,

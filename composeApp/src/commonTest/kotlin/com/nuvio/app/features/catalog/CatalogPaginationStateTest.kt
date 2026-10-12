@@ -1,12 +1,9 @@
 package com.nuvio.app.features.catalog
 
-import com.nuvio.app.features.addons.AddonCatalog
-import com.nuvio.app.features.addons.AddonExtraProperty
 import com.nuvio.app.features.home.MetaPreview
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 class CatalogPaginationStateTest {
     @Test
@@ -51,18 +48,6 @@ class CatalogPaginationStateTest {
         assertEquals(3, state.consecutiveDuplicatePages)
     }
 
-    @Test
-    fun `pagination support matches skip extra case insensitively`() {
-        val catalog = AddonCatalog(
-            type = "movie",
-            id = "popular",
-            name = "Popular",
-            extra = listOf(AddonExtraProperty(name = "Skip")),
-        )
-
-        assertTrue(catalog.supportsPagination())
-    }
-
     private fun page(
         rawItemCount: Int,
         nextSkip: Int?,
@@ -79,3 +64,4 @@ class CatalogPaginationStateTest {
             nextSkip = nextSkip,
         )
 }
+

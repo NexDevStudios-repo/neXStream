@@ -137,6 +137,18 @@ internal fun WatchProgressEntry.shouldTreatAsInProgressForContinueWatching(): Bo
     val entry = normalizedCompletion()
     if (entry.isEffectivelyCompleted) return false
 
+    val isLiveChannel = entry.contentType in listOf("channel", "tv", "live") ||
+        entry.parentMetaType in listOf("channel", "tv", "live") ||
+        entry.parentMetaId.startsWith("xtream:live:") ||
+        entry.parentMetaId.startsWith("xtream:m3u:") ||
+        entry.videoId.startsWith("xtream:live:") ||
+        entry.videoId.startsWith("xtream:m3u:")
+
+    if (isLiveChannel) {
+        return entry.source != WatchProgressSourceTraktHistory &&
+            entry.source != WatchProgressSourceTraktShowProgress
+    }
+
     val hasStartedPlayback = entry.lastPositionMs > 0L ||
         entry.normalizedProgressPercent?.let { it > 0f } == true
     if (!hasStartedPlayback) return false

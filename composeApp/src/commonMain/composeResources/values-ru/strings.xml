@@ -1,4 +1,4 @@
-﻿<resources>
+<resources>
     <string name="theme_gold">Золото</string>
     <string name="theme_jade">Джейд</string>
     <string name="theme_rose_gold">Розовое золото</string>
@@ -334,7 +334,7 @@
     <string name="collections_pinned">Закреплено</string>
     <string name="collections_tab_all">Все</string>
     <string name="collections_your_collections">Ваши коллекции</string>
-    <string name="compose_about_made_with">Сделано с ❤️ Tapframe и друзьями</string>
+    <string name="compose_about_made_with">Сделано с ❤️ Nex Dev Studios и друзьями</string>
     <string name="compose_about_version_format">Версия %1$s (%2$s)</string>
     <string name="compose_action_off">Выкл.</string>
     <string name="compose_action_on">Вкл.</string>

@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -70,23 +70,9 @@ internal fun NavigationBarSettingsSheet(
                             },
                             trailingContent = {
                                 if (style == selectedStyle) {
-                                    Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.primary)
+                                    Icon(Icons.Rounded.Check, null, tint = MaterialTheme.colorScheme.primary)
                                 }
                             },
-                        )
-                    }
-                }
-            }
-            item {
-                AnimatedVisibility(floatingNavigationGlowSupported && selectedStyle != NavBarStyle.CLASSIC) {
-                    Column {
-                        NuvioBottomSheetDivider()
-                        SettingsSwitchRow(
-                            title = stringResource(Res.string.settings_nav_bar_glow),
-                            description = stringResource(Res.string.settings_nav_bar_glow_description),
-                            checked = glowEnabled,
-                            isTablet = isTablet,
-                            onCheckedChange = onGlowChanged,
                         )
                     }
                 }

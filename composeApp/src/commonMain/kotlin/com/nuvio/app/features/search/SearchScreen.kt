@@ -50,12 +50,8 @@ import com.nuvio.app.core.ui.NuvioScreenHeader
 import com.nuvio.app.core.ui.nuvioConsumePointerEvents
 import com.nuvio.app.core.ui.withDuplicateSafeLazyKeys
 import com.nuvio.app.core.ui.ScreenActivityEffect
-import com.nuvio.app.features.addons.AddonRepository
-import com.nuvio.app.features.addons.firstEnabledManifestError
-import com.nuvio.app.features.addons.hasPendingEnabledManifests
 import com.nuvio.app.features.home.HomeCatalogSettingsRepository
 import com.nuvio.app.features.home.MetaPreview
-import com.nuvio.app.features.home.buildAddonCatalogRefreshSignature
 import com.nuvio.app.features.home.components.HomeCatalogRowSection
 import com.nuvio.app.features.home.components.HomeEmptyStateCard
 import com.nuvio.app.features.home.components.homeSectionHorizontalPaddingForWidth
@@ -112,12 +108,10 @@ fun SearchScreen(
     }
 
     LaunchedEffect(Unit) {
-        AddonRepository.initialize()
         WatchedRepository.ensureLoaded()
         SearchHistoryRepository.ensureLoaded()
     }
 
-    val addonsUiState by AddonRepository.uiState.collectAsStateWithLifecycle()
     val uiState by SearchRepository.uiState.collectAsStateWithLifecycle()
     val discoverUiState by SearchRepository.discoverUiState.collectAsStateWithLifecycle()
     val homeCatalogSettingsUiState by remember {
@@ -144,17 +138,12 @@ fun SearchScreen(
         }
     }
 
-    val addonRefreshKey = remember(addonsUiState.addons) {
-        buildAddonCatalogRefreshSignature(addonsUiState.addons)
-    }
-    val addonManifestsLoading = addonsUiState.addons.hasPendingEnabledManifests()
-
-    ScreenActivityEffect(addonRefreshKey, homeCatalogSettingsUiState.hideUnreleasedContent) { screenActive ->
+    ScreenActivityEffect(homeCatalogSettingsUiState.hideUnreleasedContent) { screenActive ->
         if (!screenActive) return@ScreenActivityEffect
-        SearchRepository.refreshDiscover(addonsUiState.addons)
+        SearchRepository.refreshDiscover()
     }
 
-    ScreenActivityEffect(query, addonRefreshKey, homeCatalogSettingsUiState.hideUnreleasedContent) { screenActive ->
+    ScreenActivityEffect(query, homeCatalogSettingsUiState.hideUnreleasedContent) { screenActive ->
         if (!screenActive) return@ScreenActivityEffect
         val normalizedQuery = query.trim()
         if (normalizedQuery.isBlank()) {
@@ -165,7 +154,6 @@ fun SearchScreen(
             lastRequestedQuery = normalizedQuery
             SearchRepository.search(
                 query = normalizedQuery,
-                addons = addonsUiState.addons,
             )
         }
     }
@@ -194,7 +182,7 @@ fun SearchScreen(
         SearchHistoryRepository.recordSearch(normalizedQuery)
     }
 
-    ScreenActivityEffect(networkStatusUiState.condition, query, addonRefreshKey) { screenActive ->
+    ScreenActivityEffect(networkStatusUiState.condition, query) { screenActive ->
         if (!screenActive) return@ScreenActivityEffect
         when (networkStatusUiState.condition) {
             NetworkCondition.NoInternet,
@@ -210,13 +198,11 @@ fun SearchScreen(
                 val normalizedQuery = query.trim()
                 if (normalizedQuery.isBlank()) {
                     SearchRepository.refreshDiscover(
-                        addons = addonsUiState.addons,
                         forceRefresh = true,
                     )
                 } else {
                     SearchRepository.search(
                         query = normalizedQuery,
-                        addons = addonsUiState.addons,
                         forceRefresh = true,
                     )
                 }
@@ -248,63 +234,63 @@ fun SearchScreen(
             listState = listState,
             modifier = Modifier.fillMaxSize(),
         ) {
-        stickyHeader {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .background(MaterialTheme.colorScheme.background)
-                        .nuvioConsumePointerEvents(),
-                )
-                androidx.compose.foundation.layout.Column(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    NuvioScreenHeader(
-                        title = headerTitle,
-                        modifier = Modifier.padding(horizontal = 16.dp),
+            stickyHeader {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(MaterialTheme.colorScheme.background)
+                            .nuvioConsumePointerEvents(),
                     )
-                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(6.dp))
-                    androidx.compose.foundation.layout.Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-                        NuvioInputField(
-                            value = query,
-                            onValueChange = { query = it },
-                            placeholder = stringResource(Res.string.compose_search_placeholder),
-                            modifier = Modifier
-                                .focusRequester(focusRequester)
-                                .onFocusChanged { isSearchFocused = it.isFocused },
-                            trailingContent = if (query.isNotBlank()) {
-                                {
-                                    IconButton(onClick = { query = "" }) {
-                                        Icon(
-                                            imageVector = Icons.Rounded.Close,
-                                            contentDescription = stringResource(Res.string.compose_search_clear),
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        )
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        NuvioScreenHeader(
+                            title = headerTitle,
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                            NuvioInputField(
+                                value = query,
+                                onValueChange = { query = it },
+                                placeholder = stringResource(Res.string.compose_search_placeholder),
+                                modifier = Modifier
+                                    .focusRequester(focusRequester)
+                                    .onFocusChanged { isSearchFocused = it.isFocused },
+                                trailingContent = if (query.isNotBlank()) {
+                                    {
+                                        IconButton(onClick = { query = "" }) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.Close,
+                                                contentDescription = stringResource(Res.string.compose_search_clear),
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            )
+                                        }
                                     }
-                                }
-                            } else {
-                                null
-                            },
+                                } else {
+                                    null
+                                },
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(14.dp))
+                    }
+                }
+            }
+
+            if (query.isBlank()) {
+                if (isSearchFocused && recentSearches.isNotEmpty()) {
+                    item(key = "recent_searches") {
+                        SearchRecentSection(
+                            recentSearches = recentSearches,
+                            onSearchPress = { recentQuery -> query = recentQuery },
+                            onRemoveSearch = SearchHistoryRepository::removeSearch,
                         )
                     }
-                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(14.dp))
                 }
-            }
-        }
-
-        if (query.isBlank()) {
-            if (isSearchFocused && recentSearches.isNotEmpty()) {
-                item(key = "recent_searches") {
-                    SearchRecentSection(
-                        recentSearches = recentSearches,
-                        onSearchPress = { recentQuery -> query = recentQuery },
-                        onRemoveSearch = SearchHistoryRepository::removeSearch,
-                    )
-                }
-            }
                 discoverContent(
                     state = discoverUiState,
-                    isSourceLoading = addonManifestsLoading,
+                    isSourceLoading = false,
                     columns = discoverColumns,
                     networkCondition = networkStatusUiState.condition,
                     onTypeSelected = SearchRepository::selectDiscoverType,
@@ -312,14 +298,7 @@ fun SearchScreen(
                     onGenreSelected = SearchRepository::selectDiscoverGenre,
                     onRetry = {
                         NetworkStatusRepository.requestRefresh(force = true)
-                        if (addonsUiState.addons.firstEnabledManifestError() != null) {
-                            AddonRepository.refreshAll()
-                        } else {
-                            SearchRepository.refreshDiscover(
-                                addons = addonsUiState.addons,
-                                forceRefresh = true,
-                            )
-                        }
+                        SearchRepository.refreshDiscover(forceRefresh = true)
                     },
                     watchedKeys = watchedUiState.watchedKeys,
                     fullyWatchedSeriesKeys = fullyWatchedSeriesKeys,
@@ -338,7 +317,7 @@ fun SearchScreen(
                         }
                     }
 
-                    (uiState.isLoading || addonManifestsLoading) && uiState.sections.isEmpty() -> {
+                    uiState.isLoading && uiState.sections.isEmpty() -> {
                         items(2) {
                             HomeSkeletonRow(
                                 horizontalPadding = homeSectionPadding,
@@ -355,15 +334,10 @@ fun SearchScreen(
                                 onRetry = {
                                     if (normalizedQuery.isNotBlank()) {
                                         NetworkStatusRepository.requestRefresh(force = true)
-                                        if (addonsUiState.addons.firstEnabledManifestError() != null) {
-                                            AddonRepository.refreshAll()
-                                        } else {
-                                            SearchRepository.search(
-                                                query = normalizedQuery,
-                                                addons = addonsUiState.addons,
-                                                forceRefresh = true,
-                                            )
-                                        }
+                                        SearchRepository.search(
+                                            query = normalizedQuery,
+                                            forceRefresh = true,
+                                        )
                                     }
                                 },
                                 modifier = Modifier.padding(horizontal = homeSectionPadding),
@@ -424,19 +398,15 @@ private fun SearchEmptyStateCard(
     val message: String
 
     when (reason) {
-        SearchEmptyStateReason.NoActiveAddons -> {
-            title = stringResource(Res.string.compose_search_empty_no_active_addons_title)
-            message = stringResource(Res.string.compose_search_empty_no_active_addons_message)
-        }
-
+        SearchEmptyStateReason.NoActiveAddons,
         SearchEmptyStateReason.NoSearchCatalogs -> {
-            title = stringResource(Res.string.compose_search_empty_no_search_catalogs_title)
-            message = stringResource(Res.string.compose_search_empty_no_search_catalogs_message)
+            title = "Sin contenido en el servidor"
+            message = "Configura o actualiza tu servidor IPTV Xtream en Ajustes para ver canales, películas y series."
         }
 
         SearchEmptyStateReason.RequestFailed -> {
-            title = stringResource(Res.string.compose_search_empty_failed_title)
-            message = errorMessage ?: stringResource(Res.string.compose_search_empty_failed_message)
+            title = "Error al buscar"
+            message = errorMessage ?: "No se pudo conectar con el servidor IPTV para obtener los resultados."
         }
 
         SearchEmptyStateReason.NoResults, null -> {

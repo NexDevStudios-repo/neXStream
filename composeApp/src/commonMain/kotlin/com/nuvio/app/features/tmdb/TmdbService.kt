@@ -1,7 +1,7 @@
-package com.nuvio.app.features.tmdb
+﻿package com.nuvio.app.features.tmdb
 
 import co.touchlab.kermit.Logger
-import com.nuvio.app.features.addons.httpGetText
+import com.nuvio.app.core.network.httpGetText
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.SerialName

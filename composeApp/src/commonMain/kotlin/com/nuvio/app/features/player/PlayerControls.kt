@@ -25,11 +25,14 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.rounded.Speed
+import androidx.compose.material.icons.rounded.SwapHoriz
+import androidx.compose.material.icons.rounded.Bookmark
+import androidx.compose.material.icons.rounded.BookmarkBorder
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Flag
 import androidx.compose.material.icons.rounded.Forward10
+import androidx.compose.material.icons.rounded.LiveTv
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockOpen
 import androidx.compose.material.icons.rounded.Replay10
@@ -109,6 +112,9 @@ internal fun PlayerControlsShell(
     onVideoSettingsClick: (() -> Unit)? = null,
     onSourcesClick: (() -> Unit)? = null,
     onEpisodesClick: (() -> Unit)? = null,
+    onChannelsClick: (() -> Unit)? = null,
+    isFavorite: Boolean = false,
+    onToggleFavorite: (() -> Unit)? = null,
     onOpenInExternalPlayer: (() -> Unit)? = null,
     onSubmitIntroClick: (() -> Unit)? = null,
     parentalWarnings: List<ParentalWarning> = emptyList(),
@@ -173,6 +179,8 @@ internal fun PlayerControlsShell(
                     metrics = metrics,
                     isLocked = isLocked,
                     showActions = showPlaybackControls,
+                    isFavorite = isFavorite,
+                    onToggleFavorite = onToggleFavorite,
                     onSubmitIntroClick = onSubmitIntroClick,
                     parentalWarnings = parentalWarnings,
                     showParentalGuide = showParentalGuide,
@@ -195,6 +203,8 @@ internal fun PlayerControlsShell(
                 if (showPlaybackControls) {
                     PlayerToolbar(
                         isLocked = isLocked,
+                        isFavorite = isFavorite,
+                        onToggleFavorite = onToggleFavorite,
                         onLockToggle = onLockToggle,
                         onBack = onBack,
                         modifier = Modifier
@@ -252,6 +262,7 @@ internal fun PlayerControlsShell(
                     onAudioClick = onAudioClick,
                     onSourcesClick = onSourcesClick,
                     onEpisodesClick = onEpisodesClick,
+                    onChannelsClick = onChannelsClick,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
@@ -301,6 +312,7 @@ internal fun PlayerControlsShell(
                         onAudioClick = onAudioClick,
                         onSourcesClick = onSourcesClick,
                         onEpisodesClick = onEpisodesClick,
+                        onChannelsClick = onChannelsClick,
                         onNextEpisodeClick = onNextEpisodeClick,
                         onSpeedClick = onSpeedClick,
                         onResizeModeClick = onResizeModeClick,
@@ -326,6 +338,8 @@ private fun PlayerHeader(
     metrics: PlayerLayoutMetrics,
     isLocked: Boolean,
     showActions: Boolean,
+    isFavorite: Boolean = false,
+    onToggleFavorite: (() -> Unit)? = null,
     onSubmitIntroClick: (() -> Unit)?,
     parentalWarnings: List<ParentalWarning>,
     showParentalGuide: Boolean,
@@ -423,6 +437,16 @@ private fun PlayerHeader(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    if (onToggleFavorite != null) {
+                        PlayerHeaderIconButton(
+                            icon = if (isFavorite) Icons.Rounded.Bookmark else Icons.Rounded.BookmarkBorder,
+                            contentDescription = if (isFavorite) "Quitar de favoritos" else "Agregar a favoritos",
+                            buttonSize = metrics.headerIconSize + 16.dp,
+                            iconSize = metrics.headerIconSize,
+                            tint = if (isFavorite) MaterialTheme.colorScheme.primary else Color.White,
+                            onClick = onToggleFavorite,
+                        )
+                    }
                     if (onSubmitIntroClick != null) {
                         PlayerHeaderIconButton(
                             icon = Icons.Rounded.Flag,
@@ -434,7 +458,7 @@ private fun PlayerHeader(
                     }
                     if (onOpenInExternalPlayer != null) {
                         PlayerHeaderIconButton(
-                            icon = Icons.Filled.SwapHoriz,
+                            icon = Icons.Rounded.SwapHoriz,
                             contentDescription = stringResource(Res.string.streams_open_external_player),
                             buttonSize = metrics.headerIconSize + 16.dp,
                             iconSize = metrics.headerIconSize,
@@ -481,6 +505,7 @@ internal fun PlayerHeaderIconButton(
     contentDescription: String,
     buttonSize: androidx.compose.ui.unit.Dp,
     iconSize: androidx.compose.ui.unit.Dp,
+    tint: Color = Color.White,
     onClick: () -> Unit,
 ) {
     Box(
@@ -494,7 +519,7 @@ internal fun PlayerHeaderIconButton(
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = Color.White,
+            tint = tint,
             modifier = Modifier.size(iconSize),
         )
     }
@@ -609,6 +634,7 @@ private fun ProgressControls(
     onAudioClick: () -> Unit,
     onSourcesClick: (() -> Unit)? = null,
     onEpisodesClick: (() -> Unit)? = null,
+    onChannelsClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val aspectRatioPainter = appIconPainter(AppIconResource.PlayerAspectRatio)
@@ -630,12 +656,12 @@ private fun ProgressControls(
             horizontalArrangement = Arrangement.Center,
         ) {
             Surface(
-                color = Color.Black.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(24.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.85f),
+                shape = CircleShape,
                 modifier = Modifier.border(
                     width = 1.dp,
-                    color = Color.White.copy(alpha = 0.2f),
-                    shape = RoundedCornerShape(24.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    shape = CircleShape,
                 ),
             ) {
                 Row(
@@ -650,7 +676,7 @@ private fun ProgressControls(
                     )
                     PlayerActionPillButton(
                         label = formatPlaybackSpeedLabel(playbackSnapshot.playbackSpeed),
-                        icon = Icons.Filled.Speed,
+                        icon = Icons.Rounded.Speed,
                         onClick = onSpeedClick,
                     )
                     PlayerActionPillButton(
@@ -675,6 +701,13 @@ private fun ProgressControls(
                             label = stringResource(Res.string.compose_player_episodes),
                             painter = episodesPainter,
                             onClick = onEpisodesClick,
+                        )
+                    }
+                    if (onChannelsClick != null) {
+                        PlayerActionPillButton(
+                            label = "Canales",
+                            icon = Icons.Rounded.LiveTv,
+                            onClick = onChannelsClick,
                         )
                     }
                 }

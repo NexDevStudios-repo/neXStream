@@ -94,15 +94,11 @@ fun ProfileSelectionScreen(
                 isEditMode = isEditMode,
                 activeProfileIndex = activeProfileIndex,
                 onEditProfile = onEditProfile,
-                onActiveProfileSelected = { scope.launch { showAlreadyActiveProfileToast(it) } },
+                onActiveProfileSelected = onProfileSelected,
                 onPinRequired = { pinDialogProfile = it },
                 onProfileSelected = onProfileSelected,
             )
         }
-    }
-
-    LaunchedEffect(Unit) {
-        AvatarRepository.refreshAvatars()
     }
 
     LaunchedEffect(Unit) {
@@ -260,16 +256,16 @@ fun ProfileSelectionScreen(
                 Box(
                     modifier = Modifier
                         .graphicsLayer { alpha = manageAlpha.value }
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(CircleShape)
                         .background(
-                            if (isEditMode) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                            else Color.Transparent,
+                            if (isEditMode) MaterialTheme.colorScheme.primaryContainer
+                            else MaterialTheme.colorScheme.surfaceContainerHigh,
                         )
                         .border(
                             width = 1.dp,
-                            color = if (isEditMode) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-                            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-                            shape = RoundedCornerShape(24.dp),
+                            color = if (isEditMode) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.outlineVariant,
+                            shape = CircleShape,
                         )
                         .clickable(enabled = interactionEnabled) { isEditMode = !isEditMode }
                         .padding(horizontal = 24.dp, vertical = 10.dp),
@@ -281,8 +277,8 @@ fun ProfileSelectionScreen(
                             stringResource(Res.string.profile_manage_profiles)
                         },
                         style = MaterialTheme.typography.bodyLarge,
-                        color = if (isEditMode) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (isEditMode) MaterialTheme.colorScheme.onPrimaryContainer
+                        else MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.SemiBold,
                     )
                 }
@@ -309,7 +305,7 @@ fun ProfileSelectionScreen(
             onVerify = { pin -> ProfileRepository.verifyPin(profile.profileIndex, pin) },
             onVerified = {
                 pinDialogProfile = null
-                if (interactionEnabled && profile.profileIndex != activeProfileIndex) {
+                if (interactionEnabled) {
                     onProfileSelected(profile)
                 }
             },
@@ -326,15 +322,17 @@ private fun ProfileAvatarCard(
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
-    val avatarColor = remember(profile.avatarColorHex) {
-        parseHexColor(profile.avatarColorHex)
+    val defaultAvatarColor = MaterialTheme.colorScheme.primary
+    val avatarColor = remember(profile.avatarColorHex, defaultAvatarColor) {
+        val hex = profile.avatarColorHex
+        if (hex.isNullOrBlank() || hex == "#2563EB" || hex == "#1E88E5" || hex.equals("#FFFFFF", ignoreCase = true)) {
+            defaultAvatarColor
+        } else {
+            parseHexColor(hex)
+        }
     }
-    val avatars by AvatarRepository.avatars.collectAsStateWithLifecycle()
-    val avatarItem = remember(profile.avatarId, avatars) {
-        profile.avatarId?.let { id -> avatars.find { it.id == id } }
-    }
-    val avatarImageUrl = remember(profile.avatarUrl, avatarItem) {
-        profileAvatarImageUrl(profile, avatarItem)
+    val avatarImageUrl = remember(profile.avatarUrl) {
+        normalizedAvatarUrl(profile.avatarUrl)
     }
 
     val animAlpha = remember { Animatable(0f) }
@@ -376,12 +374,11 @@ private fun ProfileAvatarCard(
             contentAlignment = Alignment.Center,
         ) {
             if (avatarImageUrl != null) {
-                val bgColor = avatarItem?.bgColor?.let { parseHexColor(it) } ?: avatarColor
                 Box(
                     modifier = Modifier
                         .size(110.dp)
                         .clip(CircleShape)
-                        .background(bgColor.copy(alpha = 0.2f)),
+                        .background(avatarColor.copy(alpha = 0.2f)),
                 )
             }
 
@@ -389,15 +386,9 @@ private fun ProfileAvatarCard(
                 modifier = Modifier
                     .size(100.dp)
                     .clip(CircleShape)
-                    .background(
-                        if (avatarItem != null) {
-                            avatarItem.bgColor?.let { parseHexColor(it) } ?: avatarColor
-                        } else {
-                            avatarColor.copy(alpha = 0.15f)
-                        },
-                    )
+                    .background(avatarColor.copy(alpha = 0.2f))
                     .then(
-                        if (avatarImageUrl == null) Modifier.border(2.dp, avatarColor.copy(alpha = 0.4f), CircleShape)
+                        if (avatarImageUrl == null) Modifier.border(2.dp, avatarColor.copy(alpha = 0.5f), CircleShape)
                         else Modifier,
                     ),
                 contentAlignment = Alignment.Center,
@@ -405,7 +396,7 @@ private fun ProfileAvatarCard(
                 if (avatarImageUrl != null) {
                     AsyncImage(
                         model = avatarImageUrl,
-                        contentDescription = avatarItem?.displayName ?: profile.name,
+                        contentDescription = profile.name,
                         modifier = Modifier.size(100.dp).clip(CircleShape),
                         contentScale = ContentScale.Crop,
                     )
@@ -529,10 +520,10 @@ private fun AddProfileCard(
                 modifier = Modifier
                     .size(100.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                     .border(
-                        2.dp,
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
+                        1.5.dp,
+                        MaterialTheme.colorScheme.outlineVariant,
                         CircleShape,
                     ),
                 contentAlignment = Alignment.Center,
@@ -540,7 +531,7 @@ private fun AddProfileCard(
                 Icon(
                     imageVector = Icons.Rounded.Add,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(40.dp),
                 )
             }

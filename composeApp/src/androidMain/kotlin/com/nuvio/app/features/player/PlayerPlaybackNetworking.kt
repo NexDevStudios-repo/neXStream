@@ -98,7 +98,8 @@ internal object PlayerPlaybackNetworking {
         return OkHttpDataSource.Factory(client).apply {
             setDefaultRequestProperties(requestHeaders)
             if (requestHeaders.headerValue("User-Agent") == null) {
-                setUserAgent(DEFAULT_USER_AGENT)
+                val configuredUserAgent = com.nuvio.app.features.xtream.XtreamPreferencesRepository.state.value.userAgent.ifBlank { DEFAULT_USER_AGENT }
+                setUserAgent(configuredUserAgent)
             }
         }
     }

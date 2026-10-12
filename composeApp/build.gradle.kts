@@ -119,19 +119,6 @@ abstract class GenerateRuntimeConfigsTask : DefaultTask() {
             )
         }
 
-        outDir.resolve("com/nuvio/app/features/debrid").apply {
-            mkdirs()
-            resolve("PremiumizeConfig.kt").writeText(
-                """
-                |package com.nuvio.app.features.debrid
-                |
-                |object PremiumizeConfig {
-                |    const val CLIENT_ID = "${props.getProperty("PREMIUMIZE_CLIENT_ID", "")}"
-                |}
-                """.trimMargin()
-            )
-        }
-
         outDir.resolve("com/nuvio/app/core/build").apply {
             mkdirs()
             resolve("AppVersionConfig.kt").writeText(
@@ -179,7 +166,6 @@ val supabaseProps = Properties().apply {
 val releaseAppVersionName = providers.gradleProperty("nuvio.app.versionName").orNull ?: "1.0.0"
 val releaseAppVersionCode = providers.gradleProperty("nuvio.app.versionCode").orNull?.toIntOrNull() ?: 1
 
-val fullCommonSourceDir = project.file("src/fullCommonMain/kotlin")
 val generatedRuntimeConfigDir = layout.buildDirectory.dir("generated/runtime-config/kotlin")
 val requestedGradleTasks = gradle.startParameter.taskNames.map { taskName ->
     taskName.substringAfterLast(':').lowercase()
@@ -272,7 +258,7 @@ kotlin {
         androidMain {
             kotlin.srcDir(project.file(androidDistributionSourceDir))
             if (androidDistribution == "full") {
-                kotlin.srcDir(fullCommonSourceDir)
+                kotlin.srcDir(project.file("src/fullCommonMain/kotlin"))
             }
 
             dependencies {
@@ -301,10 +287,6 @@ kotlin {
                 implementation(libs.androidx.lifecycle.process)
                 implementation(libs.mpv.android.lib)
                 implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("lib-*.aar"))))
-                if (androidDistribution == "full") {
-                    implementation(files("libs/quickjs-kt-android-1.0.5-nuvio.aar"))
-                    implementation(libs.ksoup)
-                }
             }
         }
         val androidHostTest by getting {
@@ -314,9 +296,6 @@ kotlin {
                 implementation("androidx.compose.ui:ui-test-manifest:${libs.versions.composeMultiplatform.get()}")
                 implementation("androidx.work:work-testing:${libs.versions.androidx.work.get()}")
                 implementation("com.squareup.okhttp3:mockwebserver:5.3.2")
-            }
-            if (androidDistribution == "full") {
-                kotlin.srcDir(project.file("src/androidFullHostTest/kotlin"))
             }
         }
         commonMain.dependencies {
@@ -349,6 +328,7 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.kmpalette.core)
+            implementation("com.materialkolor:material-kolor:5.0.1")
             implementation(libs.androidx.navigation3.ui)
             implementation(libs.kermit)
             implementation(libs.reorderable)

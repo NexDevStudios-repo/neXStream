@@ -1,7 +1,7 @@
-package com.nuvio.app.features.tmdb
+﻿package com.nuvio.app.features.tmdb
 
 import co.touchlab.kermit.Logger
-import com.nuvio.app.features.addons.httpGetText
+import com.nuvio.app.core.network.httpGetText
 import com.nuvio.app.features.details.MetaCompany
 import com.nuvio.app.features.details.MetaDetails
 import com.nuvio.app.features.details.MetaPerson

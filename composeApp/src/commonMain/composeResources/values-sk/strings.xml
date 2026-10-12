@@ -1,4 +1,4 @@
-﻿<resources>
+<resources>
     <string name="about_licenses_attributions_subtitle">Zdroje dát, poďakovania a licencie platformy</string>
     <string name="about_supporters_contributors_subtitle">Otvorené uznanie a kredity projektu</string>
     <string name="action_back">Späť</string>
@@ -300,7 +300,7 @@
     <string name="collections_pinned">Pripnuté</string>
     <string name="collections_tab_all">Všetko</string>
     <string name="collections_your_collections">Vaše kolekcie</string>
-    <string name="compose_about_made_with">Vytvorené s ❤️ od Tapframe a priateľov</string>
+    <string name="compose_about_made_with">Vytvorené s ❤️ od Nex Dev Studios a priateľov</string>
     <string name="compose_about_version_format">Verzia %1$s (%2$s)</string>
     <string name="compose_action_off">Vypnuté</string>
     <string name="compose_action_on">Zapnuté</string>

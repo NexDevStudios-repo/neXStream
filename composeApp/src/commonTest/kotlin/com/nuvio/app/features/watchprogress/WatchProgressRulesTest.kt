@@ -1,6 +1,5 @@
 package com.nuvio.app.features.watchprogress
 
-import com.nuvio.app.features.cloud.TorboxCloudLibraryPosterUrl
 import com.nuvio.app.features.details.MetaVideo
 import com.nuvio.app.features.trakt.parseTraktIsoDateTimeToEpochMs
 import kotlin.test.Test

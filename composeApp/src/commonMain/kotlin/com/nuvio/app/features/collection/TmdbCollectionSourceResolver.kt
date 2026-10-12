@@ -1,7 +1,7 @@
-package com.nuvio.app.features.collection
+﻿package com.nuvio.app.features.collection
 
 import co.touchlab.kermit.Logger
-import com.nuvio.app.features.addons.httpGetText
+import com.nuvio.app.core.network.httpGetText
 import com.nuvio.app.features.catalog.CatalogPage
 import com.nuvio.app.features.home.MetaPreview
 import com.nuvio.app.features.home.PosterShape

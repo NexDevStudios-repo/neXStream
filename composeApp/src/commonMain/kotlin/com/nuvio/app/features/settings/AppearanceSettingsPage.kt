@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -39,7 +39,6 @@ import nuvio.composeapp.generated.resources.compose_settings_page_continue_watch
 import nuvio.composeapp.generated.resources.compose_settings_page_homescreen
 import nuvio.composeapp.generated.resources.compose_settings_page_meta_screen
 import nuvio.composeapp.generated.resources.compose_settings_page_poster_customization
-import nuvio.composeapp.generated.resources.compose_settings_page_streams
 import nuvio.composeapp.generated.resources.settings_appearance_app_language
 import nuvio.composeapp.generated.resources.settings_appearance_app_language_restart_message
 import nuvio.composeapp.generated.resources.settings_appearance_app_language_restart_title
@@ -58,12 +57,10 @@ import nuvio.composeapp.generated.resources.settings_appearance_poster_customiza
 import nuvio.composeapp.generated.resources.settings_appearance_section_detail_page
 import nuvio.composeapp.generated.resources.settings_appearance_section_display
 import nuvio.composeapp.generated.resources.settings_appearance_section_home
-import nuvio.composeapp.generated.resources.settings_appearance_section_streams
 import nuvio.composeapp.generated.resources.settings_appearance_section_theme
 import nuvio.composeapp.generated.resources.settings_content_discovery_collections_description
 import nuvio.composeapp.generated.resources.settings_content_discovery_homescreen_description
 import nuvio.composeapp.generated.resources.settings_content_discovery_meta_screen_description
-import nuvio.composeapp.generated.resources.compose_settings_root_streams_description
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -87,30 +84,15 @@ internal fun LazyListScope.appearanceSettingsContent(
     onNavBarStyleSelected: (NavBarStyle) -> Unit,
     onHomescreenClick: () -> Unit,
     onMetaScreenClick: () -> Unit,
-    onStreamsClick: () -> Unit,
     onCollectionsClick: () -> Unit,
     onContinueWatchingClick: () -> Unit,
     onPosterCustomizationClick: () -> Unit,
 ) {
-    item {
-        SettingsSection(
-            title = stringResource(Res.string.settings_appearance_section_theme),
-            isTablet = isTablet,
-        ) {
-            SettingsGroup(isTablet = isTablet) {
-                AppearanceThemePicker(
-                    isTablet = isTablet,
-                    selectedTheme = selectedTheme,
-                    onThemeSelected = onThemeSelected,
-                )
-            }
-        }
-    }
+
     item {
         var showLanguageSheet by remember { mutableStateOf(false) }
         var showLanguageRestartDialog by remember { mutableStateOf(false) }
         val layoutDirection = LocalLayoutDirection.current
-        var showNavBarStyleSheet by remember { mutableStateOf(false) }
         var showAppIconPicker by remember { mutableStateOf(false) }
         val navBarStyleAvailable = !isIos
         val glowEnabled by ThemeSettingsRepository.navBarGlowEnabled.collectAsStateWithLifecycle()
@@ -127,16 +109,6 @@ internal fun LazyListScope.appearanceSettingsContent(
                     isTablet = isTablet,
                     onCheckedChange = onAmoledToggle,
                 )
-                if (liquidGlassNativeTabBarSupported) {
-                    SettingsGroupDivider(isTablet = isTablet)
-                    SettingsSwitchRow(
-                        title = stringResource(Res.string.settings_appearance_liquid_glass),
-                        description = stringResource(Res.string.settings_appearance_liquid_glass_description),
-                        checked = liquidGlassNativeTabBarEnabled,
-                        isTablet = isTablet,
-                        onCheckedChange = onLiquidGlassNativeTabBarToggle,
-                    )
-                }
                 SettingsGroupDivider(isTablet = isTablet)
                 SettingsNavigationRow(
                     title = stringResource(Res.string.settings_appearance_app_icon),
@@ -162,23 +134,6 @@ internal fun LazyListScope.appearanceSettingsContent(
                     isTablet = isTablet,
                     onClick = { showLanguageSheet = true },
                 )
-                if (navBarStyleAvailable) {
-                    SettingsGroupDivider(isTablet = isTablet)
-                    SettingsNavigationRow(
-                        title = stringResource(Res.string.settings_appearance_nav_bar_style),
-                        description = if (floatingNavigationGlowSupported && effectiveNavBarStyle != NavBarStyle.CLASSIC) {
-                            stringResource(
-                                Res.string.settings_nav_bar_summary,
-                                stringResource(effectiveNavBarStyle.labelRes),
-                                stringResource(if (glowEnabled) Res.string.settings_nav_bar_glow_on else Res.string.settings_nav_bar_glow_off),
-                            )
-                        } else {
-                            stringResource(effectiveNavBarStyle.labelRes)
-                        },
-                        isTablet = isTablet,
-                        onClick = { showNavBarStyleSheet = true },
-                    )
-                }
             }
         }
 
@@ -211,17 +166,6 @@ internal fun LazyListScope.appearanceSettingsContent(
                     onAppIconFailureDismissed()
                     showAppIconPicker = false
                 },
-            )
-        }
-
-        if (navBarStyleAvailable && showNavBarStyleSheet) {
-            NavigationBarSettingsSheet(
-                isTablet = isTablet,
-                selectedStyle = effectiveNavBarStyle,
-                onStyleSelected = onNavBarStyleSelected,
-                glowEnabled = glowEnabled,
-                onGlowChanged = ThemeSettingsRepository::setNavBarGlowEnabled,
-                onDismiss = { showNavBarStyleSheet = false },
             )
         }
     }
@@ -258,21 +202,6 @@ internal fun LazyListScope.appearanceSettingsContent(
                     description = stringResource(Res.string.settings_appearance_poster_customization_description),
                     isTablet = isTablet,
                     onClick = onPosterCustomizationClick,
-                )
-            }
-        }
-    }
-    item {
-        SettingsSection(
-            title = stringResource(Res.string.settings_appearance_section_streams),
-            isTablet = isTablet,
-        ) {
-            SettingsGroup(isTablet = isTablet) {
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.compose_settings_page_streams),
-                    description = stringResource(Res.string.compose_settings_root_streams_description),
-                    isTablet = isTablet,
-                    onClick = onStreamsClick,
                 )
             }
         }
@@ -353,7 +282,7 @@ private fun AppearanceLanguageBottomSheet(
                     trailingContent = {
                         if (option.language == selectedLanguage) {
                             Icon(
-                                imageVector = Icons.Default.Check,
+                                imageVector = Icons.Rounded.Check,
                                 contentDescription = stringResource(Res.string.cd_selected),
                                 tint = MaterialTheme.colorScheme.primary,
                             )

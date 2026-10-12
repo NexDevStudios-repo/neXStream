@@ -16,7 +16,7 @@ fun XtreamLiveStream.toMetaPreview(): MetaPreview =
         name = name,
         poster = streamIcon,
         landscapePoster = streamIcon,
-        posterShape = PosterShape.Landscape,
+        posterShape = PosterShape.Poster,
         description = "Canal en vivo",
     )
 
@@ -58,11 +58,10 @@ fun XtreamCategory.toHomeCatalogSection(items: List<MetaPreview>, sectionType: S
         key = "xtream:$sectionType:$categoryId",
         title = categoryName,
         subtitle = subtitleText,
-        addonName = "Xtream Codes",
-        target = CatalogTarget.Addon(
-            manifestUrl = "xtream",
+        addonName = "Xtream",
+        target = CatalogTarget.XtreamCategory(
             contentType = typeName,
-            catalogId = categoryId,
+            categoryId = categoryId,
         ),
         items = items,
         availableItemCount = items.size,

@@ -9,10 +9,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DeleteOutline
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Replay
+import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Replay
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,9 +26,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
-import com.nuvio.app.features.cloud.CloudLibraryContentType
-import com.nuvio.app.features.cloud.cloudLibraryDisplayArtworkUrl
 import com.nuvio.app.features.watchprogress.ContinueWatchingItem
 import kotlinx.coroutines.launch
 import nuvio.composeapp.generated.resources.Res
@@ -79,27 +76,27 @@ fun NuvioContinueWatchingActionSheet(
             NuvioBottomSheetDivider()
             if (showDetailsOption) {
                 NuvioBottomSheetActionRow(
-                    icon = Icons.Default.Info,
+                    icon = Icons.Rounded.Info,
                     title = stringResource(Res.string.cw_action_go_to_details),
                     onClick = { dismissAfter(onOpenDetails) },
                 )
             }
             if (showManualPlayOption && onPlayManually != null) {
                 NuvioBottomSheetActionRow(
-                    icon = Icons.Default.PlayArrow,
+                    icon = Icons.Rounded.PlayArrow,
                     title = stringResource(Res.string.play_manually),
                     onClick = { dismissAfter(onPlayManually) },
                 )
             }
             if (!item.isNextUp && onStartFromBeginning != null) {
                 NuvioBottomSheetActionRow(
-                    icon = Icons.Default.Replay,
+                    icon = Icons.Rounded.Replay,
                     title = stringResource(Res.string.cw_action_start_from_beginning),
                     onClick = { dismissAfter(onStartFromBeginning) },
                 )
             }
             NuvioBottomSheetActionRow(
-                icon = Icons.Default.DeleteOutline,
+                icon = Icons.Rounded.DeleteOutline,
                 title = stringResource(Res.string.cw_action_remove),
                 onClick = { dismissAfter(onRemove) },
             )
@@ -130,11 +127,11 @@ private fun ContinueWatchingSheetHeader(
         ) {
             val artwork = item.poster ?: item.imageUrl
             if (artwork != null) {
-                AsyncImage(
-                    model = cloudLibraryDisplayArtworkUrl(artwork),
+                coil3.compose.AsyncImage(
+                    model = artwork,
                     contentDescription = item.title,
                     modifier = Modifier.matchParentSize(),
-                    contentScale = if (item.isCloudLibraryItem()) ContentScale.Fit else ContentScale.Crop,
+                    contentScale = ContentScale.Crop,
                 )
             } else {
                 Text(
@@ -170,6 +167,3 @@ private fun ContinueWatchingSheetHeader(
         }
     }
 }
-
-private fun ContinueWatchingItem.isCloudLibraryItem(): Boolean =
-    parentMetaType.equals(CloudLibraryContentType, ignoreCase = true)

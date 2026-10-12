@@ -299,18 +299,18 @@ fun HomeHeroSection(
 
                     if (!layout.isTablet) {
                         Spacer(modifier = Modifier.height(14.dp))
-                        Surface(
-                            modifier = Modifier
-                                .clickable(enabled = onItemClick != null) {
-                                    onItemClick?.invoke(currentItem)
-                                },
-                            color = MaterialTheme.colorScheme.onBackground,
-                            contentColor = MaterialTheme.colorScheme.background,
-                            shape = RoundedCornerShape(40.dp),
+                        androidx.compose.material3.Button(
+                            onClick = { onItemClick?.invoke(currentItem) },
+                            enabled = onItemClick != null,
+                            shape = RoundedCornerShape(9999.dp),
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                            ),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 28.dp, vertical = 12.dp),
                         ) {
                             Text(
                                 text = stringResource(Res.string.home_view_details),
-                                modifier = Modifier.padding(horizontal = 28.dp, vertical = 12.dp),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                             )
@@ -337,9 +337,12 @@ fun HomeHeroSection(
                                             }
                                         }
                                         .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.onBackground)
+                                        .background(
+                                            if (activeFraction > 0.5f) MaterialTheme.colorScheme.primary
+                                            else MaterialTheme.colorScheme.surfaceContainerHighest,
+                                        )
                                         .graphicsLayer {
-                                            alpha = 0.35f + (0.57f * activeFraction)
+                                            alpha = 0.5f + (0.5f * activeFraction)
                                         }
                                         .width(8.dp + (24.dp * activeFraction))
                                         .height(8.dp),

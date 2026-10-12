@@ -105,25 +105,10 @@ internal enum class SettingsPage(
         category = SettingsCategory.General,
         parentPage = Appearance,
     ),
-    ContentDiscovery(
-        titleRes = Res.string.compose_settings_page_content_discovery,
-        category = SettingsCategory.General,
-        parentPage = Root,
-    ),
     XtreamSources(
         titleRes = Res.string.compose_settings_page_addons,
         category = SettingsCategory.General,
         parentPage = Root,
-    ),
-    Addons(
-        titleRes = Res.string.compose_settings_page_addons,
-        category = SettingsCategory.General,
-        parentPage = ContentDiscovery,
-    ),
-    Plugins(
-        titleRes = Res.string.compose_settings_page_plugins,
-        category = SettingsCategory.General,
-        parentPage = ContentDiscovery,
     ),
     Homescreen(
         titleRes = Res.string.compose_settings_page_homescreen,
@@ -147,11 +132,6 @@ internal enum class SettingsPage(
     ),
     MdbListRatings(
         titleRes = Res.string.compose_settings_page_mdblist_ratings,
-        category = SettingsCategory.General,
-        parentPage = Integrations,
-    ),
-    Debrid(
-        titleRes = Res.string.compose_settings_page_debrid,
         category = SettingsCategory.General,
         parentPage = Integrations,
     ),

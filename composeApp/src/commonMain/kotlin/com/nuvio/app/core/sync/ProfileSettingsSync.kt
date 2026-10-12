@@ -1,7 +1,6 @@
 package com.nuvio.app.core.sync
 
 import com.nuvio.app.features.collection.CollectionMobileSettingsRepository
-import com.nuvio.app.features.debrid.DebridSettingsRepository
 import com.nuvio.app.features.details.MetaScreenSettingsRepository
 import com.nuvio.app.features.mdblist.MdbListSettingsRepository
 import com.nuvio.app.features.notifications.EpisodeReleaseNotificationsRepository

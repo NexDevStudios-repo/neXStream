@@ -1,4 +1,4 @@
-﻿<resources>
+<resources>
     <string name="about_licenses_attributions_subtitle">Fontes de dados, agradecimentos e licenças da plataforma</string>
     <string name="about_supporters_contributors_subtitle">Reconhecimento público e créditos do projeto</string>
     <string name="action_back">Voltar</string>
@@ -307,7 +307,7 @@
     <string name="collections_pinned">Fixadas</string>
     <string name="collections_tab_all">Tudo</string>
     <string name="collections_your_collections">As tuas coleções</string>
-    <string name="compose_about_made_with">Feito com ❤️ pela Tapframe e amigos</string>
+    <string name="compose_about_made_with">Feito com ❤️ pela Nex Dev Studios e amigos</string>
     <string name="compose_about_version_format">Versão %1$s (%2$s)</string>
     <string name="compose_action_off">Desativado</string>
     <string name="compose_action_on">Ativado</string>

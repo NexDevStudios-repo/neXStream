@@ -11,9 +11,16 @@ data class ThemeColorPalette(
     val onSecondaryVariant: Color = Color.White,
     val focusRing: Color,
     val focusBackground: Color,
-    val background: Color = Color(0xFF0D0D0D),
-    val backgroundElevated: Color = Color(0xFF1A1A1A),
-    val backgroundCard: Color = Color(0xFF242424),
+    val background: Color = Color(0xFF0E0E11),
+    val backgroundElevated: Color = Color(0xFF16161B),
+    val backgroundCard: Color = Color(0xFF1E1E24),
+    val surfaceContainerLowest: Color = Color(0xFF09090C),
+    val surfaceContainerLow: Color = Color(0xFF131318),
+    val surfaceContainer: Color = Color(0xFF1A1A20),
+    val surfaceContainerHigh: Color = Color(0xFF23232A),
+    val surfaceContainerHighest: Color = Color(0xFF2E2E37),
+    val outline: Color = Color(0xFF383842),
+    val outlineVariant: Color = Color(0xFF25252D),
 )
 
 object ThemeColors {
@@ -173,10 +180,23 @@ object ThemeColors {
         backgroundCard = Color(0xFF222222),
     )
 
+    val MaterialYou = ThemeColorPalette(
+        secondary = Color(0xFF80BAFF),
+        secondaryVariant = Color(0xFF4A90E2),
+        accentGradient = listOf(Color(0xFF80BAFF), Color(0xFFB1C5FF), Color(0xFF5394E8)),
+        nativeAccentHex = "#80BAFF",
+        focusRing = Color(0xFFADC6FF),
+        focusBackground = Color(0xFF1E2838),
+        background = Color(0xFF0F141C),
+        backgroundElevated = Color(0xFF19202C),
+        backgroundCard = Color(0xFF222B3A),
+    )
+
     fun getColorPalette(
         theme: AppTheme,
         customColors: CustomThemeColors = CustomThemeColors.Default,
     ): ThemeColorPalette = when (theme) {
+        AppTheme.MATERIAL_YOU -> MaterialYou
         AppTheme.CUSTOM -> customColors.toColorPalette()
         AppTheme.GOLD -> Gold
         AppTheme.JADE -> Jade

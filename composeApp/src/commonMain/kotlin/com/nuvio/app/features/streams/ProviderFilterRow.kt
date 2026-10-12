@@ -105,18 +105,18 @@ private fun FilterChip(
     )
     val containerColor by animateColorAsState(
         targetValue = if (isSelected) {
-            MaterialTheme.colorScheme.primary
+            MaterialTheme.colorScheme.primaryContainer
         } else {
-            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+            MaterialTheme.colorScheme.surfaceContainerHigh
         },
         animationSpec = tween(durationMillis = 180),
         label = "filter_chip_container",
     )
     val contentColor by animateColorAsState(
         targetValue = if (isSelected) {
-            MaterialTheme.colorScheme.onPrimary
+            MaterialTheme.colorScheme.onPrimaryContainer
         } else {
-            MaterialTheme.colorScheme.onSurface
+            MaterialTheme.colorScheme.onSurfaceVariant
         },
         animationSpec = tween(durationMillis = 180),
         label = "filter_chip_content",
@@ -128,7 +128,7 @@ private fun FilterChip(
                 scaleY = scale
             }
             .height(36.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(9999.dp))
             .background(containerColor)
             .clickable(
                 interactionSource = interactionSource,

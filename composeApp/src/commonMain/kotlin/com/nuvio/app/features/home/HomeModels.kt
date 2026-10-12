@@ -1,6 +1,5 @@
 package com.nuvio.app.features.home
 
-import com.nuvio.app.features.addons.ManagedAddon
 import com.nuvio.app.features.catalog.CatalogTarget
 
 data class MetaPreview(
@@ -34,8 +33,8 @@ enum class PosterShape {
 data class HomeCatalogSection(
     val key: String,
     val title: String,
-    val subtitle: String,
-    val addonName: String,
+    val subtitle: String = "",
+    val addonName: String = "Xtream",
     val target: CatalogTarget,
     val items: List<MetaPreview>,
     val availableItemCount: Int = items.size,
@@ -54,9 +53,8 @@ data class HomeUiState(
 
 internal fun shouldShowInitialHomeLoading(
     hasRenderableHomeRows: Boolean,
-    addonManifestsLoading: Boolean,
     homeCatalogLoading: Boolean,
-): Boolean = !hasRenderableHomeRows && (addonManifestsLoading || homeCatalogLoading)
+): Boolean = !hasRenderableHomeRows && homeCatalogLoading
 
 internal fun shouldShowHomeHeroSlot(
     heroEnabled: Boolean,
@@ -65,10 +63,3 @@ internal fun shouldShowHomeHeroSlot(
     hasRenderableHomeRows: Boolean,
 ): Boolean = heroEnabled && (hasHeroItems || isResolvingHeroSources || hasRenderableHomeRows)
 
-internal data class CatalogRequest(
-    val addon: ManagedAddon,
-    val catalogId: String,
-    val catalogName: String,
-    val type: String,
-    val supportsPagination: Boolean,
-)

@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.VideoLibrary
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -84,19 +86,19 @@ internal fun MainTabsDestination(
             FloatingNavigationItem(
                 selected = selectedTab == AppScreenTab.Home,
                 onClick = { onTabSelected(AppScreenTab.Home) },
-                icon = Icons.Filled.Home,
+                icon = Icons.Rounded.Home,
                 label = stringResource(Res.string.compose_nav_home),
             ),
             FloatingNavigationItem(
                 selected = selectedTab == AppScreenTab.Search,
                 onClick = { onTabSelected(AppScreenTab.Search) },
-                drawable = Res.drawable.sidebar_search,
+                icon = Icons.Rounded.Search,
                 label = stringResource(Res.string.compose_nav_search),
             ),
             FloatingNavigationItem(
                 selected = selectedTab == AppScreenTab.Library,
                 onClick = { onTabSelected(AppScreenTab.Library) },
-                drawable = Res.drawable.sidebar_library,
+                icon = Icons.Rounded.VideoLibrary,
                 label = stringResource(Res.string.compose_nav_library),
             ),
             FloatingNavigationItem(
@@ -128,19 +130,19 @@ internal fun MainTabsDestination(
                         NavItem(
                             selected = selectedTab == AppScreenTab.Home,
                             onClick = { onTabSelected(AppScreenTab.Home) },
-                            icon = Icons.Filled.Home,
+                            icon = Icons.Rounded.Home,
                             contentDescription = stringResource(Res.string.compose_nav_home),
                         )
                         NavItem(
                             selected = selectedTab == AppScreenTab.Search,
                             onClick = { onTabSelected(AppScreenTab.Search) },
-                            icon = Res.drawable.sidebar_search,
+                            icon = Icons.Rounded.Search,
                             contentDescription = stringResource(Res.string.compose_nav_search),
                         )
                         NavItem(
                             selected = selectedTab == AppScreenTab.Library,
                             onClick = { onTabSelected(AppScreenTab.Library) },
-                            icon = Res.drawable.sidebar_library,
+                            icon = Icons.Rounded.VideoLibrary,
                             contentDescription = stringResource(Res.string.compose_nav_library),
                         )
                         NavItem(

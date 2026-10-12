@@ -1,12 +1,4 @@
 package com.nuvio.app.features.home
-
-import com.nuvio.app.features.cloud.CloudLibraryFile
-import com.nuvio.app.features.cloud.CloudLibraryItem
-import com.nuvio.app.features.cloud.CloudLibraryItemType
-import com.nuvio.app.features.cloud.CloudLibraryProviderState
-import com.nuvio.app.features.cloud.CloudLibraryUiState
-import com.nuvio.app.features.cloud.playbackVideoId
-import com.nuvio.app.features.debrid.DebridProviders
 import com.nuvio.app.features.watchprogress.CachedInProgressItem
 import com.nuvio.app.features.watchprogress.CachedNextUpItem
 import com.nuvio.app.features.watchprogress.ContinueWatchingItem
@@ -29,12 +21,11 @@ import kotlin.test.assertTrue
 class HomeScreenTest {
 
     @Test
-    fun `home remains loading while initial addon manifests are pending`() {
+    fun `home remains loading while home catalog is loading`() {
         assertTrue(
             shouldShowInitialHomeLoading(
                 hasRenderableHomeRows = false,
-                addonManifestsLoading = true,
-                homeCatalogLoading = false,
+                homeCatalogLoading = true,
             ),
         )
     }
@@ -44,14 +35,12 @@ class HomeScreenTest {
         assertFalse(
             shouldShowInitialHomeLoading(
                 hasRenderableHomeRows = true,
-                addonManifestsLoading = true,
                 homeCatalogLoading = true,
             ),
         )
         assertFalse(
             shouldShowInitialHomeLoading(
                 hasRenderableHomeRows = false,
-                addonManifestsLoading = false,
                 homeCatalogLoading = false,
             ),
         )
@@ -264,44 +253,7 @@ class HomeScreenTest {
         }
     }
 
-    @Test
-    fun `build home continue watching items enriches cloud title from library file`() {
-        val file = CloudLibraryFile(id = "8", name = "GOAT.2026.2160p.UHD.mkv")
-        val cloudItem = CloudLibraryItem(
-            providerId = DebridProviders.TORBOX_ID,
-            providerName = DebridProviders.Torbox.displayName,
-            id = "29773238",
-            type = CloudLibraryItemType.Torrent,
-            name = "GOAT torrent",
-            files = listOf(file),
-        )
-        val progress = WatchProgressEntry(
-            contentType = "cloud",
-            parentMetaId = cloudItem.stableKey,
-            parentMetaType = "cloud",
-            videoId = cloudItem.playbackVideoId(file),
-            title = cloudItem.stableKey,
-            lastPositionMs = 120_000L,
-            durationMs = 1_000_000L,
-            lastUpdatedEpochMs = 500L,
-        )
 
-        val result = buildHomeContinueWatchingItems(
-            visibleEntries = listOf(progress),
-            nextUpItemsBySeries = emptyMap(),
-            cloudLibraryUiState = CloudLibraryUiState(
-                isLoaded = true,
-                providers = listOf(
-                    CloudLibraryProviderState(
-                        provider = DebridProviders.Torbox,
-                        items = listOf(cloudItem),
-                    ),
-                ),
-            ),
-        )
-
-        assertEquals("GOAT.2026.2160p.UHD.mkv", result.single().title)
-    }
 
     @Test
     fun `build home continue watching items preserves cached in progress identity and metadata`() {

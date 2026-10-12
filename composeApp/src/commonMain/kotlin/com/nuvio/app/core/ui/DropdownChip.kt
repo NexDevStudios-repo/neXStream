@@ -1,7 +1,10 @@
 package com.nuvio.app.core.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,8 +58,13 @@ fun NuvioDropdownChip(
 
     Row(
         modifier = modifier
-            .clip(tokens.shapes.compactCard)
-            .background(tokens.colors.surface)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant,
+                shape = CircleShape,
+            )
             .then(
                 if (enabled) {
                     Modifier.clickable { isSheetVisible = true }
@@ -64,7 +72,7 @@ fun NuvioDropdownChip(
                     Modifier
                 },
             )
-            .padding(horizontal = NuvioTokens.Space.s12, vertical = tokens.components.chipVerticalPadding),
+            .padding(horizontal = NuvioTokens.Space.s14, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s6),
         verticalAlignment = Alignment.CenterVertically,
     ) {

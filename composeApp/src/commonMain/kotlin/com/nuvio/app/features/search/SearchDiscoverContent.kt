@@ -58,11 +58,7 @@ internal fun LazyListScope.discoverContent(
     state.selectedCatalog?.let { selectedCatalog ->
         item {
             Text(
-                text = stringResource(
-                    Res.string.discover_catalog_context,
-                    selectedCatalog.addonName,
-                    selectedCatalog.type.displayTypeLabel(),
-                ),
+                text = "${selectedCatalog.catalogName} · ${selectedCatalog.type.displayTypeLabel()}",
                 modifier = Modifier.padding(horizontal = 16.dp),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontSize = 14.sp,
@@ -216,19 +212,15 @@ private fun DiscoverEmptyStateCard(
     val message: String
 
     when (reason) {
-        DiscoverEmptyStateReason.NoActiveAddons -> {
-            title = stringResource(Res.string.compose_search_empty_no_active_addons_title)
-            message = stringResource(Res.string.discover_empty_no_active_addons_message)
-        }
-
+        DiscoverEmptyStateReason.NoActiveAddons,
         DiscoverEmptyStateReason.NoDiscoverCatalogs -> {
-            title = stringResource(Res.string.discover_empty_no_catalogs_title)
-            message = stringResource(Res.string.discover_empty_no_catalogs_message)
+            title = "Sin categorías disponibles"
+            message = "Agrega o activa un servidor IPTV Xtream en Ajustes > Servidores IPTV para explorar contenido."
         }
 
         DiscoverEmptyStateReason.RequestFailed -> {
-            title = stringResource(Res.string.discover_empty_load_failed_title)
-            message = errorMessage ?: stringResource(Res.string.discover_empty_load_failed_message)
+            title = "Error al cargar contenido"
+            message = errorMessage ?: "No se pudieron obtener las categorías del servidor IPTV."
         }
 
         DiscoverEmptyStateReason.NoResults, null -> {

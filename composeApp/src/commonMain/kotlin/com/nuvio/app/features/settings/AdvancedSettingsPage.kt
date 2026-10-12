@@ -127,10 +127,10 @@ internal fun LazyListScope.advancedSettingsContent(
                     isTablet = isTablet,
                     onClick = {
                         if (!cleared) {
-                            ContinueWatchingEnrichmentCache.clearAll(ProfileRepository.activeProfileId)
                             cleared = true
+                            WatchProgressRepository.clearAllProgress()
                             scope.launch {
-                                WatchProgressRepository.clearLocalAndForceSnapshotRefreshFromServer(
+                                WatchProgressRepository.forceSnapshotRefreshFromServer(
                                     ProfileRepository.activeProfileId,
                                 )
                             }

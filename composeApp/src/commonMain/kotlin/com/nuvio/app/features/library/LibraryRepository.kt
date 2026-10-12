@@ -144,6 +144,7 @@ object LibraryRepository {
         _uiState.value = LibraryUiState()
     }
 
+
     internal fun runAccountStorageWipe(wipeStorage: () -> Unit) {
         synchronized(loadLock) {
             val transition = localState.reset()
@@ -367,6 +368,13 @@ object LibraryRepository {
             pushToServer(result.snapshot)
         }
     }
+
+    /** Elimina todos los favoritos guardados localmente del perfil activo. */
+    fun clearAllSaved() {
+        ensureLoaded()
+        localState.snapshot().items.toList().forEach { remove(it.id, it.type) }
+    }
+
 
     private fun remove(id: String, type: String) {
         ensureLoaded()
@@ -748,6 +756,13 @@ internal fun libraryMembershipWithRemovedList(
 internal fun String.toLibraryDisplayTitle(): String {
     val normalized = trim()
     if (normalized.isBlank()) return localizedLibraryOtherTitle()
+
+    val lower = normalized.lowercase()
+    when (lower) {
+        "channel", "tv", "live" -> return "Canales"
+        "movie" -> return "Películas"
+        "series" -> return "Series"
+    }
 
     return normalized
         .split('-', '_', ' ')

@@ -1,6 +1,5 @@
 package com.nuvio.app.core.sync
 
-import com.nuvio.app.features.debrid.DebridSettingsRepository
 import com.nuvio.app.features.mdblist.MdbListSettingsRepository
 import com.nuvio.app.features.player.PlayerSettingsRepository
 import com.nuvio.app.features.tmdb.TmdbSettingsRepository
@@ -22,7 +21,6 @@ object ProviderCredentialSync {
     }
 
     private fun ensureRepositoriesLoaded() {
-        DebridSettingsRepository.ensureLoaded()
         TmdbSettingsRepository.ensureLoaded()
         MdbListSettingsRepository.ensureLoaded()
         PlayerSettingsRepository.ensureLoaded()

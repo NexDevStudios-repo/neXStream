@@ -31,9 +31,6 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.nuvio.app.core.ui.NuvioScreen
 import com.nuvio.app.core.ui.NuvioScreenHeader
-import com.nuvio.app.features.cloud.PremiumizeCloudLibraryPosterUrl
-import com.nuvio.app.features.cloud.TorboxCloudLibraryPosterUrl
-import com.nuvio.app.features.cloud.cloudLibraryDisplayArtworkUrl
 import com.nuvio.app.isIos
 import nuvio.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.StringResource
@@ -43,8 +40,6 @@ private const val TmdbUrl = "https://www.themoviedb.org"
 private const val ImdbDatasetsUrl = "https://developer.imdb.com/non-commercial-datasets/"
 private const val TraktUrl = "https://trakt.tv"
 private const val SimklUrl = "https://simkl.com"
-private const val PremiumizeUrl = "https://www.premiumize.me"
-private const val TorboxUrl = "https://torbox.app"
 private const val MdbListUrl = "https://mdblist.com"
 private const val IntroDbUrl = "https://introdb.app/"
 private const val NuvioRepositoryUrl = "https://github.com/NuvioMedia/NuvioMobile"
@@ -352,20 +347,6 @@ private fun attributionItems(): List<AttributionItem> = listOf(
         bodyRes = Res.string.settings_licenses_attributions_simkl_body,
         logo = IntegrationLogo.Simkl,
         link = SimklUrl,
-    ),
-    AttributionItem(
-        titleRes = Res.string.settings_licenses_attributions_premiumize_title,
-        bodyRes = Res.string.settings_licenses_attributions_premiumize_body,
-        logo = null,
-        logoUrl = PremiumizeCloudLibraryPosterUrl,
-        link = PremiumizeUrl,
-    ),
-    AttributionItem(
-        titleRes = Res.string.settings_licenses_attributions_torbox_title,
-        bodyRes = Res.string.settings_licenses_attributions_torbox_body,
-        logo = null,
-        logoUrl = cloudLibraryDisplayArtworkUrl(TorboxCloudLibraryPosterUrl),
-        link = TorboxUrl,
     ),
     AttributionItem(
         titleRes = Res.string.settings_licenses_attributions_mdblist_title,

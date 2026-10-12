@@ -137,7 +137,6 @@ internal fun StreamBadgeImage(badge: StreamBadge) {
 
 @Composable
 internal fun StreamFileSizeBadge(stream: StreamItem) {
-    val tokens = MaterialTheme.nuvio
     val bytes = stream.behaviorHints.videoSize ?: return
     val gib = bytes.toDouble() / (1024.0 * 1024.0 * 1024.0)
     val sizeLabel = if (gib >= 1.0) {
@@ -148,13 +147,13 @@ internal fun StreamFileSizeBadge(stream: StreamItem) {
         "${round(mib).toInt()} ${localizedByteUnit("MB")}"
     }
 
-    val badgeShape = StreamBadgeChipDefaults.shape
+    val badgeShape = RoundedCornerShape(8.dp)
     Box(
         modifier = Modifier
             .height(StreamBadgeChipSize.STREAM.containerHeight)
             .clip(badgeShape)
-            .background(tokens.colors.surfacePopover)
-            .border(tokens.borders.thin, tokens.colors.borderSubtle, badgeShape)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), badgeShape)
             .padding(horizontal = StreamBadgeChipDefaults.fileSizeHorizontalPadding),
         contentAlignment = Alignment.Center,
     ) {
@@ -166,7 +165,7 @@ internal fun StreamFileSizeBadge(stream: StreamItem) {
                 fontWeight = FontWeight.Bold,
                 letterSpacing = StreamBadgeChipDefaults.fileSizeLetterSpacing,
             ),
-            color = tokens.colors.textPrimary,
+            color = MaterialTheme.colorScheme.onSurface,
         )
     }
 }

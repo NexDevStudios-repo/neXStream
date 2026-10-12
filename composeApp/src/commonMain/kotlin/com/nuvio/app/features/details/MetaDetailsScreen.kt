@@ -31,14 +31,14 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CheckCircleOutline
-import androidx.compose.material.icons.filled.DoneAll
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.PlaylistAddCheckCircle
-import androidx.compose.material.icons.filled.Shuffle
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.CheckCircleOutline
+import androidx.compose.material.icons.rounded.DoneAll
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.PlaylistAddCheckCircle
+import androidx.compose.material.icons.rounded.Shuffle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.nuvio.app.core.ui.NuvioLoadingIndicator
@@ -390,28 +390,8 @@ fun MetaDetailsScreen(
         )
     }
 
-    LaunchedEffect(type, id, displayedMeta, uiState.isLoading, autoLoadAttempted) {
-        if (!autoLoadAttempted && displayedMeta == null && !uiState.isLoading) {
-            autoLoadAttempted = true
-            MetaDetailsRepository.load(type, id)
-        }
-    }
-
-    LaunchedEffect(
-        type,
-        id,
-        displayedMeta?.id,
-        uiState.isLoading,
-        trackingSettingsUiState.moreLikeThisSource,
-        traktAuthUiState.mode,
-        tmdbSettingsUiState.enabled,
-        tmdbSettingsUiState.useMoreLikeThis,
-        tmdbSettingsUiState.language,
-        mdbListSettings,
-    ) {
-        if (displayedMeta != null && !uiState.isLoading) {
-            MetaDetailsRepository.load(type, id)
-        }
+    LaunchedEffect(type, id) {
+        MetaDetailsRepository.load(type, id)
     }
 
     LaunchedEffect(networkStatusUiState.condition, displayedMeta, uiState.isLoading, type, id) {
@@ -1678,7 +1658,7 @@ fun MetaDetailsScreen(
                 actions = buildList {
                     add(
                         PosterZoomOverlayAction(
-                            icon = Icons.Default.CheckCircle,
+                            icon = Icons.Rounded.CheckCircle,
                             label = if (isSelectedEpisodeWatched) {
                                 stringResource(Res.string.episode_mark_unwatched)
                             } else {
@@ -1696,7 +1676,7 @@ fun MetaDetailsScreen(
                     if (previousEpisodes.isNotEmpty()) {
                         add(
                             PosterZoomOverlayAction(
-                                icon = Icons.Default.DoneAll,
+                                icon = Icons.Rounded.DoneAll,
                                 label = if (arePreviousEpisodesWatched) {
                                     stringResource(Res.string.episode_mark_previous_unwatched)
                                 } else {
@@ -1714,7 +1694,7 @@ fun MetaDetailsScreen(
                     }
                     add(
                         PosterZoomOverlayAction(
-                            icon = Icons.Default.PlaylistAddCheckCircle,
+                            icon = Icons.Rounded.PlaylistAddCheckCircle,
                             label = if (isSeasonWatched) {
                                 stringResource(Res.string.episode_mark_season_unwatched, seasonLabel)
                             } else {
@@ -1736,7 +1716,7 @@ fun MetaDetailsScreen(
                     ) {
                         add(
                             PosterZoomOverlayAction(
-                                icon = Icons.Default.PlayArrow,
+                                icon = Icons.Rounded.PlayArrow,
                                 label = stringResource(Res.string.play_manually),
                                 onSelected = {
                                     val playbackVideoId = buildPlaybackVideoId(

@@ -28,6 +28,8 @@ internal data class PlayerSurfaceGestureCallbacks(
     val currentPositionMs: State<Long>,
     val currentDurationMs: State<Long>,
     val commitHorizontalSeek: State<(Long) -> Unit>,
+    val isLive: State<Boolean>,
+    val onZapChannel: State<((Boolean) -> Unit)?>,
 )
 
 internal fun PlayerScreenRuntime.showGestureFeedback(feedback: GestureFeedbackState) {
@@ -320,5 +322,7 @@ internal fun PlayerScreenRuntime.rememberSurfaceGestureCallbacks(): PlayerSurfac
             playerController?.seekTo(targetPositionMs)
             scheduleProgressSyncAfterSeek()
         },
+        isLive = rememberUpdatedState(isLive),
+        onZapChannel = rememberUpdatedState(if (isLive) { { forward: Boolean -> zapChannel(forward) } } else null),
     )
 }

@@ -47,22 +47,23 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.nuvio.app.core.ui.DisintegratingContainer
 import com.nuvio.app.core.ui.DisintegrationRequest
 import com.nuvio.app.core.ui.NuvioCardDepthSurface
+import com.nuvio.app.core.ui.NuvioMediaPlaceholder
 import com.nuvio.app.core.ui.NuvioProgressBar
 import com.nuvio.app.core.ui.nuvioCardDepth
 import com.nuvio.app.core.ui.NuvioShelfSection
 import com.nuvio.app.core.ui.NuvioTokens
 import com.nuvio.app.core.ui.PosterLandscapeAspectRatio
 import com.nuvio.app.core.ui.PosterCardStyleUiState
+import com.nuvio.app.core.ui.rememberPosterCardStyleUiState
 import com.nuvio.app.core.ui.ScopedDisintegrationTracker
 import com.nuvio.app.core.ui.landscapePosterHeightForWidth
 import com.nuvio.app.core.ui.landscapePosterWidth
 import com.nuvio.app.core.ui.posterCardClickable
-import com.nuvio.app.core.ui.rememberPosterCardStyleUiState
-import com.nuvio.app.features.cloud.CloudLibraryContentType
-import com.nuvio.app.features.cloud.cloudLibraryDisplayArtworkUrl
 import com.nuvio.app.features.tracking.WatchProgressSource
 import com.nuvio.app.features.watchprogress.ContinueWatchingItem
 import com.nuvio.app.features.watchprogress.ContinueWatchingSectionStyle
@@ -126,14 +127,9 @@ private fun localizedContinueWatchingMetaLine(item: ContinueWatchingItem): Strin
     when {
         item.seasonNumber != null && item.episodeNumber != null ->
             stringResource(Res.string.compose_player_episode_code_full, item.seasonNumber, item.episodeNumber)
-        item.isCloudLibraryItem() ->
-            stringResource(Res.string.library_source_cloud)
         else ->
             stringResource(Res.string.media_movie)
     }
-
-private fun ContinueWatchingItem.isCloudLibraryItem(): Boolean =
-    parentMetaType.equals(CloudLibraryContentType, ignoreCase = true)
 
 private fun ContinueWatchingItem.continueWatchingArtworkUrl(
     useEpisodeThumbnails: Boolean,
@@ -725,39 +721,70 @@ private fun ContinueWatchingCard(
                 zoomCornerRadius = cardMetrics.cornerRadius,
             ),
     ) {
-        if (imageUrl != null) {
+        var imageLoadError by remember(imageUrl) { mutableStateOf(false) }
+        val isChannelItem = item.parentMetaType == "channel" ||
+            item.parentMetaId.startsWith("xtream:live:") ||
+            item.parentMetaId.startsWith("xtream:m3u:") ||
+            item.videoId.startsWith("xtream:live:") ||
+            item.videoId.startsWith("xtream:m3u:")
+        if (!imageUrl.isNullOrBlank() && !imageLoadError) {
             val cwFallbackUrl = item.fallbackUrlForArtwork(imageUrl)
             val cwImageModel = continuewatchingImageModel(
-                imageUrl = cloudLibraryDisplayArtworkUrl(imageUrl),
+                imageUrl = imageUrl,
                 fallbackUrl = cwFallbackUrl,
             )
-            AsyncImage(
-                model = cwImageModel,
-                contentDescription = item.title,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .then(if (shouldBlurArtwork) Modifier.blur(18.dp) else Modifier)
-                    .drawWithContent {
-                        drawContent()
+            if (isChannelItem) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.5f))
+                        .padding(14.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    AsyncImage(
+                        model = cwImageModel,
+                        contentDescription = item.title,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit,
+                        onError = { imageLoadError = true },
+                    )
+                }
+            } else {
+                AsyncImage(
+                    model = cwImageModel,
+                    contentDescription = item.title,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .then(if (shouldBlurArtwork) Modifier.blur(18.dp) else Modifier)
+                        .drawWithContent {
+                            drawContent()
 
-                        val startY = size.height * 0.45f
-                        val gradient = Brush.verticalGradient(
-                            colorStops = arrayOf(
-                                0.0f to Color.Transparent,
-                                0.60f to backgroundColor.copy(alpha = 0.70f),
-                                1.0f to backgroundColor.copy(alpha = 0.95f),
-                            ),
-                            startY = startY,
-                            endY = size.height,
-                        )
+                            val startY = size.height * 0.45f
+                            val gradient = Brush.verticalGradient(
+                                colorStops = arrayOf(
+                                    0.0f to Color.Transparent,
+                                    0.60f to backgroundColor.copy(alpha = 0.70f),
+                                    1.0f to backgroundColor.copy(alpha = 0.95f),
+                                ),
+                                startY = startY,
+                                endY = size.height,
+                            )
 
-                        drawRect(
-                            brush = gradient,
-                            topLeft = Offset(-2f, startY),
-                            size = Size(size.width + 4f, (size.height - startY) + 4f),
-                        )
-                    },
-                contentScale = ContentScale.Crop,
+                            drawRect(
+                                brush = gradient,
+                                topLeft = Offset(-2f, startY),
+                                size = Size(size.width + 4f, (size.height - startY) + 4f),
+                            )
+                        },
+                    contentScale = ContentScale.Crop,
+                    onError = { imageLoadError = true },
+                )
+            }
+        } else {
+            NuvioMediaPlaceholder(
+                title = item.title,
+                modifier = Modifier.fillMaxSize(),
+                isChannel = isChannelItem,
             )
         }
         if (item.shufflePlayback) ShuffleBadge(Modifier.align(Alignment.TopStart).padding(8.dp))
@@ -922,7 +949,7 @@ private fun ContinueWatchingWideCard(
             width = layout.widePosterStripWidth,
             blurred = shouldBlurArtwork,
             fallbackUrl = item.fallbackUrlForArtwork(artworkUrl),
-            contentScale = if (item.isCloudLibraryItem()) ContentScale.Fit else ContentScale.Crop,
+            contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxHeight(),
         )
         Column(
@@ -1055,19 +1082,50 @@ private fun ContinueWatchingPosterCard(
                 useEpisodeThumbnails = useEpisodeThumbnails,
                 artworkUrl = imageUrl,
             )
-            if (imageUrl != null) {
+            var imageLoadError by remember(imageUrl) { mutableStateOf(false) }
+            val isChannelItem = item.parentMetaType == "channel" ||
+                item.parentMetaId.startsWith("xtream:live:") ||
+                item.parentMetaId.startsWith("xtream:m3u:") ||
+                item.videoId.startsWith("xtream:live:") ||
+                item.videoId.startsWith("xtream:m3u:")
+            if (!imageUrl.isNullOrBlank() && !imageLoadError) {
                 val cwFallbackUrl = item.fallbackUrlForArtwork(imageUrl)
                 val cwImageModel = continuewatchingImageModel(
-                    imageUrl = cloudLibraryDisplayArtworkUrl(imageUrl),
+                    imageUrl = imageUrl,
                     fallbackUrl = cwFallbackUrl,
                 )
-                AsyncImage(
-                    model = cwImageModel,
-                    contentDescription = item.title,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .then(if (shouldBlurArtwork) Modifier.blur(18.dp) else Modifier),
-                    contentScale = if (item.isCloudLibraryItem()) ContentScale.Fit else ContentScale.Crop,
+                if (isChannelItem) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.5f))
+                            .padding(14.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        AsyncImage(
+                            model = cwImageModel,
+                            contentDescription = item.title,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Fit,
+                            onError = { imageLoadError = true },
+                        )
+                    }
+                } else {
+                    AsyncImage(
+                        model = cwImageModel,
+                        contentDescription = item.title,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .then(if (shouldBlurArtwork) Modifier.blur(18.dp) else Modifier),
+                        contentScale = ContentScale.Crop,
+                        onError = { imageLoadError = true },
+                    )
+                }
+            } else {
+                NuvioMediaPlaceholder(
+                    title = item.title,
+                    modifier = Modifier.fillMaxSize(),
+                    isChannel = isChannelItem,
                 )
             }
             if (item.shufflePlayback) ShuffleBadge(Modifier.align(Alignment.TopStart).padding(8.dp))
@@ -1168,9 +1226,10 @@ private fun ArtworkPanel(
             .width(width)
             .background(MaterialTheme.colorScheme.surfaceVariant),
     ) {
-        if (imageUrl != null) {
+        var imageLoadError by remember(imageUrl) { mutableStateOf(false) }
+        if (!imageUrl.isNullOrBlank() && !imageLoadError) {
             val artworkModel = continuewatchingImageModel(
-                imageUrl = cloudLibraryDisplayArtworkUrl(imageUrl),
+                imageUrl = imageUrl,
                 fallbackUrl = fallbackUrl,
             )
             AsyncImage(
@@ -1180,6 +1239,13 @@ private fun ArtworkPanel(
                     .fillMaxSize()
                     .then(if (blurred) Modifier.blur(18.dp) else Modifier),
                 contentScale = contentScale,
+                onError = { imageLoadError = true },
+            )
+        } else {
+            NuvioMediaPlaceholder(
+                title = "",
+                modifier = Modifier.fillMaxSize(),
+                isChannel = false,
             )
         }
     }

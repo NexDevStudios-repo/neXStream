@@ -22,9 +22,6 @@ import com.nuvio.app.core.ui.DisintegrationRequest
 import com.nuvio.app.core.ui.NuvioLoadingIndicator
 import com.nuvio.app.core.ui.NuvioTokens
 import com.nuvio.app.core.ui.nuvio
-import com.nuvio.app.features.cloud.CloudLibraryContentType
-import com.nuvio.app.features.cloud.CloudLibraryFile
-import com.nuvio.app.features.cloud.CloudLibraryItem
 import com.nuvio.app.features.home.HomeCatalogSection
 import com.nuvio.app.features.home.HomeScreen
 import com.nuvio.app.features.home.MetaPreview
@@ -90,8 +87,6 @@ internal data class AppTabActions(
     val onLibraryPosterClick: ((LibraryItem) -> Unit)? = null,
     val onLibraryPosterLongClick: ((LibraryItem, LibrarySection) -> Unit)? = null,
     val onLibrarySectionViewAllClick: ((LibrarySection, LibrarySortOption) -> Unit)? = null,
-    val onCloudFilePlay: ((CloudLibraryItem, CloudLibraryFile) -> Unit)? = null,
-    val onConnectCloudClick: (() -> Unit)? = null,
     val onDownloadsClick: () -> Unit = {},
     val onContinueWatchingClick: ((ContinueWatchingItem) -> Unit)? = null,
     val onContinueWatchingLongPress: ((ContinueWatchingItem) -> Unit)? = null,
@@ -100,8 +95,6 @@ internal data class AppTabActions(
     val onHomescreenSettingsClick: () -> Unit = {},
     val onMetaScreenSettingsClick: () -> Unit = {},
     val onContinueWatchingSettingsClick: () -> Unit = {},
-    val onAddonsSettingsClick: () -> Unit = {},
-    val onPluginsSettingsClick: () -> Unit = {},
     val onAccountSettingsClick: () -> Unit = {},
     val onSupportersContributorsSettingsClick: () -> Unit = {},
     val onLicensesAttributionsSettingsClick: () -> Unit = {},
@@ -164,8 +157,6 @@ internal fun AppTabHost(
                     onPosterClick = actions.onLibraryPosterClick,
                     onPosterLongClick = actions.onLibraryPosterLongClick,
                     onSectionViewAllClick = actions.onLibrarySectionViewAllClick,
-                    onCloudFilePlay = actions.onCloudFilePlay,
-                    onConnectCloudClick = actions.onConnectCloudClick,
                     onDownloadsClick = actions.onDownloadsClick,
                     disintegrationRequest = state.libraryDisintegrationRequest,
                 )
@@ -184,8 +175,6 @@ internal fun AppTabHost(
                     onHomescreenClick = actions.onHomescreenSettingsClick,
                     onMetaScreenClick = actions.onMetaScreenSettingsClick,
                     onContinueWatchingClick = actions.onContinueWatchingSettingsClick,
-                    onAddonsClick = actions.onAddonsSettingsClick,
-                    onPluginsClick = actions.onPluginsSettingsClick,
                     onAccountClick = actions.onAccountSettingsClick,
                     onSupportersContributorsClick = actions.onSupportersContributorsSettingsClick,
                     onLicensesAttributionsClick = actions.onLicensesAttributionsSettingsClick,
@@ -197,9 +186,6 @@ internal fun AppTabHost(
         }
     }
 }
-
-internal fun ContinueWatchingItem.isCloudLibraryContinueWatchingItem(): Boolean =
-    parentMetaType.equals(CloudLibraryContentType, ignoreCase = true)
 
 @Composable
 internal fun AppLoadingContent(

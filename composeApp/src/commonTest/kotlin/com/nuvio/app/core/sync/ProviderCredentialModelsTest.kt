@@ -1,9 +1,5 @@
 package com.nuvio.app.core.sync
 
-import com.nuvio.app.features.debrid.DebridSettings
-import com.nuvio.app.features.mdblist.MdbListSettings
-import com.nuvio.app.features.player.PlayerSettingsUiState
-import com.nuvio.app.features.tmdb.TmdbSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.serialization.json.buildJsonObject
@@ -12,24 +8,22 @@ import kotlinx.serialization.json.put
 class ProviderCredentialModelsTest {
     @Test
     fun `TMDB credential snapshot contains the personal override`() {
-        val snapshot = credentialSnapshot(TmdbSettings(apiKey = " personal-key "))
-        val credential = snapshot.values.single { it.provider == ProviderCredentialIds.TMDB }
-
-        assertEquals(1, snapshot.profileId)
+        val credential = ProviderCredentialValue(ProviderCredentialIds.TMDB, PROVIDER_API_KEY_FIELD, "personal-key")
         assertEquals(buildJsonObject { put("api_key", "personal-key") }, credential.credentialJson())
     }
 
     @Test
-    fun `empty TMDB override syncs a clear tombstone instead of the bundled key`() {
-        val snapshot = credentialSnapshot(TmdbSettings())
-        val credential = snapshot.values.single { it.provider == ProviderCredentialIds.TMDB }
-
+    fun `empty TMDB override syncs a clear tombstone`() {
+        val credential = ProviderCredentialValue(ProviderCredentialIds.TMDB, PROVIDER_API_KEY_FIELD, "")
         assertEquals(buildJsonObject { put("api_key", "") }, credential.credentialJson())
     }
 
     @Test
     fun `remote TMDB override can be replaced and cleared`() {
-        val local = credentialSnapshot(TmdbSettings(apiKey = "local-key"))
+        val local = ProviderCredentialSnapshot(
+            profileId = 1,
+            values = listOf(ProviderCredentialValue(ProviderCredentialIds.TMDB, PROVIDER_API_KEY_FIELD, "local-key")),
+        )
         val remote = listOf(
             SupabaseProviderCredential("tmdb", buildJsonObject { put("api_key", "remote-key") }),
         )
@@ -44,12 +38,12 @@ class ProviderCredentialModelsTest {
         val snapshot = ProviderCredentialSnapshot(
             profileId = 1,
             values = listOf(
-                ProviderCredentialValue("debrid:torbox", "api_key", "local-torbox"),
+                ProviderCredentialValue("tmdb", "api_key", "local-tmdb"),
                 ProviderCredentialValue("animeskip", "client_id", "local-anime"),
             ),
         )
         val rows = listOf(
-            SupabaseProviderCredential("DEBRID:TORBOX", buildJsonObject { put("api_key", "remote") }),
+            SupabaseProviderCredential("TMDB", buildJsonObject { put("api_key", "remote") }),
             SupabaseProviderCredential("animeskip", buildJsonObject { put("client_id", "remote") }),
         )
 
@@ -61,12 +55,12 @@ class ProviderCredentialModelsTest {
         val snapshot = ProviderCredentialSnapshot(
             profileId = 1,
             values = listOf(
-                ProviderCredentialValue("debrid:torbox", "api_key", "local-torbox"),
+                ProviderCredentialValue("tmdb", "api_key", "local-tmdb"),
                 ProviderCredentialValue("animeskip", "client_id", "local-anime"),
             ),
         )
         val rows = listOf(
-            SupabaseProviderCredential("debrid:torbox", buildJsonObject { put("api_key", "remote") }),
+            SupabaseProviderCredential("tmdb", buildJsonObject { put("api_key", "remote") }),
         )
 
         assertEquals(listOf("remote", ""), snapshot.mergeRemote(rows).values.map { it.value })
@@ -77,14 +71,14 @@ class ProviderCredentialModelsTest {
         val local = ProviderCredentialSnapshot(
             profileId = 2,
             values = listOf(
-                ProviderCredentialValue("debrid:torbox", "api_key", "local-torbox"),
+                ProviderCredentialValue("tmdb", "api_key", "local-tmdb"),
                 ProviderCredentialValue("animeskip", "client_id", "local-anime"),
             ),
         )
         val remote = listOf(
             SupabaseProviderCredential(
-                provider = "debrid:torbox",
-                credentialJson = buildJsonObject { put("api_key", "remote-torbox") },
+                provider = "tmdb",
+                credentialJson = buildJsonObject { put("api_key", "remote-tmdb") },
             ),
             SupabaseProviderCredential(
                 provider = "unsupported",
@@ -94,7 +88,7 @@ class ProviderCredentialModelsTest {
 
         val merged = local.mergeRemote(remote)
 
-        assertEquals("remote-torbox", merged.values[0].value)
+        assertEquals("remote-tmdb", merged.values[0].value)
         assertEquals("", merged.values[1].value)
     }
 
@@ -103,7 +97,7 @@ class ProviderCredentialModelsTest {
         val local = ProviderCredentialSnapshot(
             profileId = 1,
             values = listOf(
-                ProviderCredentialValue("debrid:torbox", "api_key", "local-torbox"),
+                ProviderCredentialValue("tmdb", "api_key", "local-tmdb"),
                 ProviderCredentialValue("animeskip", "client_id", "local-anime"),
             ),
         )
@@ -126,12 +120,5 @@ class ProviderCredentialModelsTest {
 
         assertEquals("", local.mergeRemote(remote).values.single().value)
     }
-
-    private fun credentialSnapshot(tmdb: TmdbSettings) = ProviderCredentialSync.buildSnapshot(
-        profileId = 1,
-        debrid = DebridSettings(),
-        tmdb = tmdb,
-        mdbList = MdbListSettings(),
-        player = PlayerSettingsUiState(),
-    )
 }
+

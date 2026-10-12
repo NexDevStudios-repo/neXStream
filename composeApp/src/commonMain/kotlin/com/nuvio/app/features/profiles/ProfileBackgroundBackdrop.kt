@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.material3.MaterialTheme
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.nuvio.app.core.ui.ProfileMeshBackground
@@ -29,8 +30,14 @@ fun ProfileBackgroundBackdrop(
         MemberAccessRepository.access
     }.collectAsStateWithLifecycle()
     val backgroundCatalog by ProfileBackgroundRepository.catalog.collectAsStateWithLifecycle()
-    val profileColor = remember(profile?.avatarColorHex) {
-        profile?.avatarColorHex?.let(::parseHexColor) ?: Color(0xFF1E88E5)
+    val defaultAccent = MaterialTheme.colorScheme.primary
+    val profileColor = remember(profile?.avatarColorHex, defaultAccent) {
+        val hex = profile?.avatarColorHex
+        if (hex.isNullOrBlank() || hex == "#2563EB" || hex == "#1E88E5" || hex.equals("#FFFFFF", ignoreCase = true)) {
+            defaultAccent
+        } else {
+            parseHexColor(hex)
+        }
     }
     val backgroundSelection = remember(
         profile?.profileBackgroundId,
@@ -40,7 +47,11 @@ fun ProfileBackgroundBackdrop(
         profile?.let { resolveProfileBackground(it, memberAccess.entitlements) }
     }
 
-    BoxWithConstraints(modifier = modifier) {
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color(0xFF0C0D12)),
+    ) {
         val isPortrait = maxHeight > maxWidth
         LaunchedEffect(backgroundSelection, isPortrait) {
             val selectedId = (backgroundSelection as? ProfileBackgroundSelection.Catalog)?.id

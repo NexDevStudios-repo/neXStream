@@ -1,50 +1,50 @@
 package com.nuvio.app.core.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.ClipOp
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.PointerInputScope
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.nuvio.app.core.ui.glass.GlassBarSurface
-import com.nuvio.app.core.ui.jelly.JellyMotion
-import com.nuvio.app.core.ui.jelly.JellyTabRow
-import com.nuvio.app.core.ui.jelly.JellyTabTargets
-import com.nuvio.app.core.ui.jelly.drawJellyGlow
-import com.nuvio.app.core.ui.jelly.drawJellyPill
-import com.nuvio.app.core.ui.jelly.jellyPillPath
 import dev.chrisbanes.haze.HazeState
-import kotlin.math.abs
-import kotlin.math.max
 
 internal actual val floatingNavigationGlowSupported: Boolean
     get() = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU
@@ -60,131 +60,120 @@ internal actual fun FloatingNavigationBar(
     glowEnabled: Boolean,
 ) {
     if (items.isEmpty()) return
-    val showGlow = !floatingNavigationGlowSupported || glowEnabled
-    val glowStrength by animateFloatAsState(
-        targetValue = if (showGlow) 1f else 0f,
-        animationSpec = tween(420, easing = NuvioTokens.Motion.standard),
-        label = "nav_glow_strength",
-    )
-    val tokens = MaterialTheme.nuvio
-    val accentColor = tokens.colors.accent
-    val selectedSurface = accentColor.copy(alpha = NuvioTokens.Opacity.selected)
-    val labelFraction by animateFloatAsState(
-        targetValue = scrollState?.labelVisibility ?: 1f,
-        animationSpec = tween(NuvioTokens.Motion.sheetEnterMillis, easing = NuvioTokens.Motion.standard),
-        label = "jelly_labels",
-    )
-    val layoutDirection = LocalLayoutDirection.current
-    val isRtl = layoutDirection == LayoutDirection.Rtl
-    val selectedIndex = items.indexOfFirst { it.selected }
-    val visualSelectedIndex = visualNavIndex(selectedIndex, items.size, isRtl)
-    val motion = remember(items.size, isRtl) { JellyMotion(visualSelectedIndex, items.size) }
-    val currentItems by rememberUpdatedState(items)
-    val currentIsRtl by rememberUpdatedState(isRtl)
-    val density = LocalDensity.current
-    val trackHeight = 48.dp + (if (compactSize) 8.dp else 16.dp) * labelFraction
-    val horizontalPadding = 58.dp - 30.dp * labelFraction
-
-    LaunchedEffect(visualSelectedIndex, items.size) {
-        motion.select(visualSelectedIndex)
-    }
-    LaunchedEffect(motion.running) {
-        if (!motion.running) return@LaunchedEffect
-        var previous = withFrameNanos { it }
-        while (motion.running) {
-            withFrameNanos { now ->
-                motion.advance((now - previous) / 1_000_000_000.0)
-                previous = now
-            }
-        }
-    }
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .padding(contentPadding)
-            .padding(horizontal = horizontalPadding),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         contentAlignment = Alignment.BottomCenter,
     ) {
-        Box(
+        val shape = CircleShape
+        val surfaceColor = MaterialTheme.colorScheme.surfaceContainer
+        val borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+
+        Surface(
             modifier = Modifier
-                .widthIn(max = 400.dp)
-                .fillMaxWidth()
-                .height(trackHeight)
-                .onSizeChanged {
-                    motion.resize(it.width / density.density, it.height / density.density, items.size)
-                }
-                .pointerInput(motion, density, items.size, isRtl) {
-                    detectJellyTabGestures(motion, density.density, { currentItems }, { currentIsRtl })
-                },
+                .shadow(
+                    elevation = 8.dp,
+                    shape = shape,
+                    ambientColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.30f),
+                    spotColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.18f),
+                )
+                .clip(shape)
+                .background(surfaceColor)
+                .border(1.dp, borderColor, shape),
+            shape = shape,
+            color = surfaceColor,
+            tonalElevation = 3.dp,
         ) {
-            Box(
+            Row(
                 modifier = Modifier
-                    .matchParentSize()
-                    .graphicsLayer {
-                        val frame = motion.frame
-                        scaleX = frame.trackScale
-                        scaleY = frame.trackScale
-                    },
+                    .height(64.dp)
+                    .padding(horizontal = 10.dp, vertical = 7.dp)
+                    .animateContentSize(
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioLowBouncy,
+                            stiffness = Spring.StiffnessMediumLow,
+                        ),
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .graphicsLayer {
-                            val frame = motion.frame
-                            transformOrigin = TransformOrigin(
-                                if (size.width > 0) frame.originX * density.density / size.width else 0.5f,
-                                0.5f,
-                            )
-                            scaleX = frame.trackScaleX
-                            translationY = frame.trackOffsetY * density.density
-                        },
-                ) {
-                    Box(
+                items.forEach { item ->
+                    val isSelected = item.selected
+                    val haptic = LocalHapticFeedback.current
+
+                    val iconScale by animateFloatAsState(
+                        targetValue = if (isSelected) 1.05f else 1f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessMedium,
+                        ),
+                        label = "icon_scale",
+                    )
+
+                    Surface(
                         modifier = Modifier
-                            .matchParentSize()
-                            .graphicsLayer { translationX = motion.frame.panelOffset * density.density },
-                    ) {
-                        Box(
-                            Modifier.matchParentSize()
-                                .clip(RoundedCornerShape(50))
-                                .drawWithContent {
-                                    drawContent()
-                                    drawJellyGlow(motion.frame, accentColor.copy(alpha = accentColor.alpha * glowStrength))
-                                },
-                        ) {
-                            GlassBarSurface(hazeState, Modifier.matchParentSize(), glowStrength)
-                        }
-                        Box(
-                            Modifier.matchParentSize().drawWithContent {
-                                if (selectedIndex >= 0) {
-                                    clipPath(jellyPillPath(motion.frame, items.size), ClipOp.Difference) {
-                                        this@drawWithContent.drawContent()
-                                    }
-                                } else {
-                                    drawContent()
-                                }
-                            },
-                        ) {
-                            JellyTabRow(items, labelFraction, motion, active = false, compactSize = compactSize, modifier = Modifier.matchParentSize())
-                        }
-                        if (selectedIndex >= 0) {
-                            Box(
-                                Modifier.matchParentSize()
-                                    .clearAndSetSemantics {}
-                                    .drawWithContent {
-                                        drawJellyPill(
-                                            motion.frame,
-                                            items.size,
-                                            selectedSurface,
-                                            accentColor.copy(alpha = accentColor.alpha * glowStrength),
-                                        ) { drawContent() }
-                                    },
+                            .height(50.dp)
+                            .clip(CircleShape)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = ripple(bounded = true),
                             ) {
-                                JellyTabRow(items, labelFraction, motion, active = true, compactSize = compactSize, modifier = Modifier.matchParentSize())
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                item.onClick()
+                            },
+                        shape = CircleShape,
+                        color = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(horizontal = if (isSelected) 16.dp else 13.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            if (item.content != null) {
+                                Box(
+                                    modifier = Modifier.size(28.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    item.content.invoke(item.onClick)
+                                }
+                            } else if (item.icon != null) {
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = item.label,
+                                    tint = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer
+                                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .graphicsLayer {
+                                            scaleX = iconScale
+                                            scaleY = iconScale
+                                        },
+                                )
+                            }
+
+                            AnimatedVisibility(
+                                visible = isSelected,
+                                enter = fadeIn(spring(stiffness = Spring.StiffnessMedium)) + expandHorizontally(spring(stiffness = Spring.StiffnessMedium)),
+                                exit = fadeOut(tween(durationMillis = 100)) + shrinkHorizontally(tween(durationMillis = 150)),
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = item.label,
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        maxLines = 1,
+                                        softWrap = false,
+                                    )
+                                }
                             }
                         }
-                        JellyTabTargets(items, labelFraction, motion, compactSize, Modifier.matchParentSize())
                     }
                 }
             }
@@ -197,53 +186,3 @@ internal fun visualNavIndex(logicalIndex: Int, count: Int, isRtl: Boolean): Int 
 
 internal fun logicalNavIndex(visualIndex: Int, count: Int, isRtl: Boolean): Int =
     if (visualIndex in 0 until count && isRtl) count - 1 - visualIndex else visualIndex
-
-internal suspend fun PointerInputScope.detectJellyTabGestures(
-    motion: JellyMotion,
-    density: Float,
-    currentItems: () -> List<FloatingNavigationItem>,
-    isRtl: () -> Boolean,
-) {
-    awaitEachGesture {
-        val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
-        motion.begin(down.position.x / density, down.position.y / density)
-        var claimed = false
-        var finished = false
-        try {
-            while (true) {
-                val event = awaitPointerEvent(PointerEventPass.Initial)
-                if (!motion.dragging) {
-                    finished = true
-                    break
-                }
-                val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                if (event.changes.count { it.pressed } > 1) break
-                val delta = change.position - down.position
-                if (max(abs(delta.x), abs(delta.y)) > viewConfiguration.touchSlop) claimed = true
-                if (claimed) change.consume()
-                awaitPointerEvent(PointerEventPass.Main)
-                if (!motion.dragging) {
-                    finished = true
-                    break
-                }
-                if (change.isConsumed && !claimed) break
-                motion.drag(delta.x / density, delta.y / density)
-                if (!change.pressed) {
-                    val visualIndex = motion.finish()
-                    val items = currentItems()
-                    val logicalIndex = logicalNavIndex(visualIndex, items.size, isRtl())
-                    finished = true
-                    items.getOrNull(logicalIndex)?.onClick?.invoke()
-                    change.consume()
-                    break
-                }
-            }
-        } finally {
-            if (!finished) {
-                val items = currentItems()
-                val selectedIndex = items.indexOfFirst { it.selected }
-                motion.cancel(visualNavIndex(selectedIndex, items.size, isRtl()))
-            }
-        }
-    }
-}

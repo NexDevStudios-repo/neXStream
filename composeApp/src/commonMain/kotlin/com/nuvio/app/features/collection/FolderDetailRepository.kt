@@ -1,14 +1,11 @@
 package com.nuvio.app.features.collection
 
 import co.touchlab.kermit.Logger
-import com.nuvio.app.features.addons.AddonRepository
 import com.nuvio.app.features.catalog.CATALOG_PAGE_SIZE
 import com.nuvio.app.features.catalog.CatalogPage
 import com.nuvio.app.features.catalog.CatalogTarget
-import com.nuvio.app.features.catalog.fetchCatalogPage
 import com.nuvio.app.features.catalog.mergeCatalogItems
 import com.nuvio.app.features.catalog.nextCatalogPaginationState
-import com.nuvio.app.features.catalog.supportsPagination
 import com.nuvio.app.core.poster.withCustomPosterUrls
 import com.nuvio.app.core.i18n.localizedMediaTypeLabel
 import com.nuvio.app.features.home.HomeCatalogSettingsRepository
@@ -130,7 +127,6 @@ object FolderDetailRepository {
 
         val sources = folder.resolvedSources
         val showAll = collection.showAllTab && sources.size > 1
-        val addons = AddonRepository.uiState.value.addons
 
         val tabs = buildList {
             if (showAll) {
@@ -186,28 +182,6 @@ object FolderDetailRepository {
                             isLoading = true,
                         ),
                     )
-                } else {
-                    val catalogSource = source.addonCatalogSource() ?: return@forEachIndexed
-                    val resolvedCatalog = addons.findCollectionCatalog(catalogSource)
-                    val addon = resolvedCatalog?.addon
-                    val catalog = resolvedCatalog?.catalog
-                    val label = catalog?.name ?: catalogSource.catalogId
-                    val typeLabel = localizedMediaTypeLabel(catalogSource.type)
-                    val genreSuffix = if (catalogSource.genre != null) " · ${catalogSource.genre}" else ""
-                    add(
-                        FolderTab(
-                            label = "$label ($typeLabel)$genreSuffix",
-                            typeLabel = typeLabel,
-                            source = source,
-                            sourceKey = source.catalogRouteKey(),
-                            manifestUrl = addon?.manifestUrl,
-                            type = catalogSource.type,
-                            catalogId = catalogSource.catalogId,
-                            genre = catalogSource.genre,
-                            supportsPagination = catalog?.supportsPagination() == true,
-                            isLoading = true,
-                        ),
-                    )
                 }
             }
         }
@@ -225,17 +199,7 @@ object FolderDetailRepository {
         // Load catalog data for each source
         sources.forEachIndexed { sourceIndex, source ->
             val tabIndex = if (showAll) sourceIndex + 1 else sourceIndex
-            val catalogSource = source.addonCatalogSource()
-            val resolvedCatalog = catalogSource?.let { addons.findCollectionCatalog(it) }
-            if (!source.isTmdb && !source.isTrakt && resolvedCatalog == null) {
-                updateTab(tabIndex) {
-                    it.copy(
-                        isLoading = false,
-                        error = runBlocking {
-                            getString(Res.string.collections_folder_addon_not_found, catalogSource?.addonId.orEmpty())
-                        },
-                    )
-                }
+            if (!source.isTmdb && !source.isTrakt) {
                 return@forEachIndexed
             }
 
@@ -334,12 +298,10 @@ object FolderDetailRepository {
                         page = if (reset) 1 else requestedSkip,
                     )
 
-                    else -> fetchCatalogPage(
-                        manifestUrl = requireNotNull(currentTab.manifestUrl),
-                        type = currentTab.type,
-                        catalogId = currentTab.catalogId,
-                        genre = currentTab.genre,
-                        skip = requestedSkip.takeIf { it > 0 },
+                    else -> CatalogPage(
+                        items = emptyList(),
+                        rawItemCount = 0,
+                        nextSkip = null,
                     )
                 }.withUnreleasedFilter()
             }.onSuccess { page ->
@@ -445,12 +407,9 @@ object FolderDetailRepository {
                     supportsPagination = tab.supportsPagination,
                 )
             } else {
-                val manifestUrl = tab.manifestUrl ?: return@mapNotNull null
-                CatalogTarget.Addon(
-                    manifestUrl = manifestUrl,
+                CatalogTarget.XtreamCategory(
                     contentType = tab.type,
-                    catalogId = tab.catalogId,
-                    genre = tab.genre,
+                    categoryId = tab.catalogId,
                     supportsPagination = tab.supportsPagination,
                 )
             }

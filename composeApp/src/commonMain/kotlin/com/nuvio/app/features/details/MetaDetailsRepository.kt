@@ -1,11 +1,6 @@
 package com.nuvio.app.features.details
 
 import co.touchlab.kermit.Logger
-import com.nuvio.app.features.addons.AddonManifest
-import com.nuvio.app.features.addons.AddonRepository
-import com.nuvio.app.features.addons.buildAddonResourceUrl
-import com.nuvio.app.features.addons.enabledAddons
-import com.nuvio.app.features.addons.fetchAddonResponseText
 import com.nuvio.app.core.poster.withCustomPosterUrls
 import com.nuvio.app.features.home.HomeCatalogSettingsRepository
 import com.nuvio.app.features.home.filterReleasedItems
@@ -28,7 +23,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
@@ -51,22 +45,43 @@ object MetaDetailsRepository {
 
     fun load(type: String, id: String) {
         log.d { "load() called — type=$type id=$id" }
+        val requestKey = "$type:$id"
+        val currentState = _uiState.value
+
         if (id.startsWith("xtream:")) {
-            val requestKey = "$type:$id"
+            if (activeRequestKey == requestKey && currentState.meta?.id == id && !currentState.isLoading) {
+                log.d { "Xtream meta already loaded — type=$type id=$id" }
+                return
+            }
+            if (currentState.isLoading && activeRequestKey == requestKey) {
+                log.d { "Xtream meta request already in flight — type=$type id=$id" }
+                return
+            }
+
+            cachedMetaByRequestKey[requestKey]?.let { cachedEntry ->
+                _uiState.value = MetaDetailsUiState(meta = cachedEntry.baseMeta)
+                activeRequestKey = requestKey
+                return
+            }
+
             activeRequestKey = requestKey
             _uiState.value = MetaDetailsUiState(isLoading = true)
             scope.launch {
                 try {
                     val meta = com.nuvio.app.features.xtream.XtreamRepository.getMetaDetails(id)
-                    _uiState.value = MetaDetailsUiState(meta = meta)
+                    if (meta != null) {
+                        cachedMetaByRequestKey[requestKey] = CachedMetaEntry(baseMeta = meta)
+                        _uiState.value = MetaDetailsUiState(meta = meta)
+                    } else {
+                        _uiState.value = MetaDetailsUiState(errorMessage = "Contenido no encontrado en el servidor IPTV")
+                    }
                 } catch (e: Exception) {
                     _uiState.value = MetaDetailsUiState(errorMessage = e.message)
                 }
             }
             return
         }
-        val requestKey = "$type:$id"
-        val currentState = _uiState.value
+
         val mdbListSettings = MdbListSettingsRepository.snapshot()
         val metaScreenSettingsFingerprint = buildMetaScreenSettingsFingerprint(mdbListSettings)
 
@@ -129,48 +144,6 @@ object MetaDetailsRepository {
         _uiState.value = MetaDetailsUiState(isLoading = true)
 
         scope.launch {
-            val metaLookupId = resolveMetaLookupId(itemId = id, itemType = type)
-            val manifests = findReadyMetaManifests(type = type, id = metaLookupId)
-
-            if (manifests.isEmpty()) {
-                val tmdbMeta = tryFetchTmdbFallbackMeta(type = type, id = id)
-                if (tmdbMeta != null) {
-                    publishLoadedMeta(
-                        requestKey = requestKey,
-                        meta = tmdbMeta,
-                        fallbackItemId = id,
-                        fallbackItemType = type,
-                        mdbListSettings = mdbListSettings,
-                        metaScreenSettingsFingerprint = metaScreenSettingsFingerprint,
-                    )
-                    return@launch
-                }
-
-                log.w { "No addon provides meta for type=$type id=$id" }
-                _uiState.value = MetaDetailsUiState(
-                    errorMessage = getString(Res.string.details_no_addon_meta),
-                )
-                activeRequestKey = null
-                return@launch
-            }
-
-            for (manifest in manifests) {
-                val result = withContext(Dispatchers.Default) {
-                    tryFetchMeta(manifest, type, metaLookupId, includeMdbList = false)
-                }
-                if (result != null) {
-                    publishLoadedMeta(
-                        requestKey = requestKey,
-                        meta = result,
-                        fallbackItemId = metaLookupId,
-                        fallbackItemType = type,
-                        mdbListSettings = mdbListSettings,
-                        metaScreenSettingsFingerprint = metaScreenSettingsFingerprint,
-                    )
-                    return@launch
-                }
-            }
-
             val tmdbMeta = tryFetchTmdbFallbackMeta(type = type, id = id)
             if (tmdbMeta != null) {
                 publishLoadedMeta(
@@ -184,8 +157,9 @@ object MetaDetailsRepository {
                 return@launch
             }
 
+            log.w { "No meta provider for type=$type id=$id" }
             _uiState.value = MetaDetailsUiState(
-                errorMessage = getString(Res.string.details_load_failed_all_addons),
+                errorMessage = "No metadata found",
             )
             activeRequestKey = null
         }
@@ -214,18 +188,13 @@ object MetaDetailsRepository {
         val requestKey = "$type:$id"
         cachedMetaByRequestKey[requestKey]?.let { return it.baseMeta }
 
-        val metaLookupId = resolveMetaLookupId(itemId = id, itemType = type)
-        val manifests = findReadyMetaManifests(type = type, id = metaLookupId)
-
-        for (manifest in manifests) {
-            val result = withTimeoutOrNull(FETCH_TIMEOUT_MS) {
-                tryFetchMeta(manifest, type, metaLookupId, includeMdbList = false)
-            }
-            if (result != null) {
+        if (id.startsWith("xtream:")) {
+            val xtreamMeta = com.nuvio.app.features.xtream.XtreamRepository.getMetaDetails(id)
+            if (xtreamMeta != null) {
                 if (cacheResult) {
-                    cachedMetaByRequestKey[requestKey] = CachedMetaEntry(baseMeta = result)
+                    cachedMetaByRequestKey[requestKey] = CachedMetaEntry(baseMeta = xtreamMeta)
                 }
-                return result
+                return xtreamMeta
             }
         }
 
@@ -237,94 +206,8 @@ object MetaDetailsRepository {
     }
 
     private const val FETCH_TIMEOUT_MS = 5_000L
-    private const val METADATA_PROVIDER_READY_TIMEOUT_MS = 10_000L
     private const val TMDB_ENRICH_TIMEOUT_MS = 5_000L
     private const val MDBLIST_ENRICH_TIMEOUT_MS = 5_000L
-
-    private suspend fun tryFetchMeta(
-        manifest: AddonManifest,
-        type: String,
-        id: String,
-        includeMdbList: Boolean,
-    ): MetaDetails? {
-        val url = buildAddonResourceUrl(
-            manifestUrl = manifest.transportUrl,
-            resource = "meta",
-            type = type,
-            id = id,
-        )
-
-        return try {
-            TmdbSettingsRepository.ensureLoaded()
-            log.d { "Fetching meta from: $url" }
-            val payload = fetchAddonResponseText(url)
-            log.d { "Raw payload length=${payload.length}, first 500 chars: ${payload.take(500)}" }
-            val result = MetaDetailsParser.parse(payload)
-            val tmdbEnriched = withTimeoutOrNull(TMDB_ENRICH_TIMEOUT_MS) {
-                TmdbMetadataService.enrichMeta(
-                    meta = result,
-                    fallbackItemId = id,
-                    settings = TmdbSettingsRepository.snapshot(),
-                )
-            } ?: result
-            val enriched = if (includeMdbList) {
-                MdbListSettingsRepository.ensureLoaded()
-                withTimeoutOrNull(MDBLIST_ENRICH_TIMEOUT_MS) {
-                    MdbListMetadataService.enrichMeta(
-                        meta = tmdbEnriched,
-                        fallbackItemId = id,
-                        settings = MdbListSettingsRepository.snapshot(),
-                    )
-                } ?: tmdbEnriched
-            } else {
-                tmdbEnriched
-            }
-            log.d { "Parsed meta: type=${enriched.type}, name=${enriched.name}, videos=${enriched.videos.size}" }
-            if (enriched.videos.isNotEmpty()) {
-                val first = enriched.videos.first()
-                log.d { "First video: id=${first.id} title=${first.title} s=${first.season} e=${first.episode} embeddedStreams=${first.streams.size}" }
-            }
-            enriched
-        } catch (e: Throwable) {
-            if (e is CancellationException) throw e
-            log.e(e) { "Failed to fetch/parse meta from $url (manifest=${manifest.transportUrl})" }
-            null
-        }
-    }
-
-    private suspend fun findReadyMetaManifests(type: String, id: String): List<AddonManifest> {
-        AddonRepository.initialize()
-
-        findMetaManifests(AddonRepository.uiState.value, type, id).takeIf { it.isNotEmpty() }?.let { return it }
-
-        if (!AddonRepository.uiState.value.hasPendingEnabledAddonManifests()) {
-            return emptyList()
-        }
-
-        val readyState = withTimeoutOrNull(METADATA_PROVIDER_READY_TIMEOUT_MS) {
-            AddonRepository.uiState.first { state ->
-                findMetaManifests(state, type, id).isNotEmpty() ||
-                    !state.hasPendingEnabledAddonManifests()
-            }
-        } ?: AddonRepository.uiState.value
-
-        return findMetaManifests(readyState, type, id)
-    }
-
-    private fun findMetaManifests(state: com.nuvio.app.features.addons.AddonsUiState, type: String, id: String): List<AddonManifest> =
-        state.addons
-            .enabledAddons()
-            .mapNotNull { it.manifest }
-            .filter { manifest ->
-                manifest.resources.any { resource ->
-                    resource.name == "meta" &&
-                        resource.types.contains(type) &&
-                        (resource.idPrefixes.isEmpty() || resource.idPrefixes.any { id.startsWith(it) })
-                }
-            }
-
-    private fun com.nuvio.app.features.addons.AddonsUiState.hasPendingEnabledAddonManifests(): Boolean =
-        addons.enabledAddons().any { addon -> addon.manifest == null && addon.isRefreshing }
 
     private suspend fun resolveMetaLookupId(itemId: String, itemType: String): String {
         val tmdbId = itemId

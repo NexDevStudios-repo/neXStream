@@ -114,15 +114,17 @@ internal fun Modifier.nuvioConsumePointerEvents(): Modifier =
 fun NuvioSurfaceCard(
     modifier: Modifier = Modifier,
     tonalElevation: Int = 0,
+    shape: Shape = MaterialTheme.shapes.extraLarge,
+    color: Color = MaterialTheme.colorScheme.surfaceContainerLow,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val tokens = MaterialTheme.nuvio
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = tokens.colors.surface,
-        shape = tokens.shapes.card,
+        color = color,
+        shape = shape,
         tonalElevation = tonalElevation.dp,
-        shadowElevation = tokens.elevation.flat,
+        shadowElevation = 0.dp,
     ) {
         Column(
             modifier = Modifier.padding(tokens.spacing.cardPadding),
@@ -340,28 +342,27 @@ fun NuvioInputField(
     modifier: Modifier = Modifier,
     trailingContent: (@Composable (() -> Unit))? = null,
 ) {
-    val tokens = MaterialTheme.nuvio
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier.fillMaxWidth(),
         singleLine = true,
-        shape = RoundedCornerShape(NuvioTokens.Radius.lg),
+        shape = RoundedCornerShape(16.dp),
         placeholder = {
             Text(
                 text = placeholder,
-                color = tokens.colors.textMuted,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyLarge,
             )
         },
-        textStyle = MaterialTheme.typography.bodyLarge.copy(color = tokens.colors.textPrimary),
+        textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
         trailingIcon = trailingContent,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = tokens.colors.borderFocus,
-            unfocusedBorderColor = tokens.colors.borderDefault,
-            focusedContainerColor = tokens.colors.surfaceCard,
-            unfocusedContainerColor = tokens.colors.surfaceCard,
-            cursorColor = tokens.colors.accent,
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            cursorColor = MaterialTheme.colorScheme.primary,
         ),
     )
 }
@@ -371,19 +372,18 @@ fun NuvioInfoBadge(
     text: String,
     modifier: Modifier = Modifier,
 ) {
-    val tokens = MaterialTheme.nuvio
     Box(
         modifier = modifier
             .background(
-                color = tokens.colors.surfaceCard,
-                shape = tokens.shapes.chip,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                shape = RoundedCornerShape(9999.dp),
             )
-            .padding(horizontal = NuvioTokens.Space.s10, vertical = NuvioTokens.Space.s6),
+            .padding(horizontal = 12.dp, vertical = 6.dp),
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.labelMedium,
-            color = tokens.colors.textMuted,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )

@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.nuvio.app.core.ui.SkeletonBlock
-import com.nuvio.app.features.debrid.DebridProviders
 
 @Composable
 internal fun StreamCard(
@@ -57,37 +56,29 @@ internal fun StreamCard(
     isCurrent: Boolean = false,
     currentLabel: String? = null,
 ) {
-    val cardShape = RoundedCornerShape(12.dp)
+    val cardShape = RoundedCornerShape(16.dp)
     val badgeImages = stream.badges.filter { it.imageURL.isNotBlank() }
     val hasBadges = badgeImages.isNotEmpty() || (showFileSizeBadges && stream.behaviorHints.videoSize != null)
     Row(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 68.dp)
-            .shadow(
-                elevation = 2.dp,
-                shape = cardShape,
-                ambientColor = Color.Black.copy(alpha = 0.04f),
-                spotColor = Color.Black.copy(alpha = 0.04f),
-            )
             .clip(cardShape)
             .background(
                 if (isCurrent) {
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
                 } else {
-                    Color.White.copy(alpha = 0.05f)
+                    MaterialTheme.colorScheme.surfaceContainerLow
                 },
             )
-            .then(
-                if (isCurrent) {
-                    Modifier.border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.52f),
-                        shape = cardShape,
-                    )
+            .border(
+                width = 1.dp,
+                color = if (isCurrent) {
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                 } else {
-                    Modifier
+                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
                 },
+                shape = cardShape,
             )
             .combinedClickable(
                 enabled = enabled,
@@ -174,13 +165,13 @@ internal fun StreamCardSkeleton(modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 68.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.White.copy(alpha = 0.05f))
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
             .padding(14.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
     ) {
-        SkeletonBlock(modifier = Modifier.fillMaxWidth(0.55f), height = 14.dp, cornerRadius = 4.dp)
-        SkeletonBlock(modifier = Modifier.fillMaxWidth(0.85f), height = 10.dp, cornerRadius = 4.dp)
+        SkeletonBlock(modifier = Modifier.fillMaxWidth(0.55f), height = 14.dp, cornerRadius = 6.dp)
+        SkeletonBlock(modifier = Modifier.fillMaxWidth(0.85f), height = 10.dp, cornerRadius = 6.dp)
     }
 }
 
@@ -284,8 +275,6 @@ private fun CurrentStreamBadge(label: String) {
 private fun StreamItem.instantServiceLabel(): String? {
     val status = debridCacheStatus ?: return null
     if (status.state != StreamDebridCacheState.CACHED) return null
-    val providerLabel = DebridProviders.shortName(status.providerId)
-        .ifBlank { status.providerName.trim() }
-        .ifBlank { DebridProviders.displayName(status.providerId) }
+    val providerLabel = status.providerName.trim().ifBlank { status.providerId }
     return "- $providerLabel Instant"
 }

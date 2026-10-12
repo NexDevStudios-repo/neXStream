@@ -32,6 +32,10 @@ fun HomePosterCard(
         item.rawPosterUrl
     }
 
+    val isChannel = item.type == "channel" ||
+        item.id.startsWith("xtream:live:") ||
+        item.id.startsWith("xtream:m3u:")
+
     NuvioPosterCard(
         title = item.name,
         imageUrl = imageUrl,
@@ -43,6 +47,7 @@ fun HomePosterCard(
         bottomLeftLogoUrl = if (isLandscapeMode && showLandscapeOverlay && effectiveLandscapePoster.isNullOrBlank()) item.logo else null,
         bottomLeftText = if (isLandscapeMode && showLandscapeOverlay && effectiveLandscapePoster.isNullOrBlank() && item.logo.isNullOrBlank() && !posterCardStyle.hideLabelsEnabled) item.name else null,
         isWatched = isWatched,
+        isChannel = isChannel,
         onClick = onClick,
         onLongClick = onLongClick,
     )

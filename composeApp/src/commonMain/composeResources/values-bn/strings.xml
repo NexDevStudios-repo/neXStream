@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="theme_gold">গোল্ড</string>
     <string name="theme_jade">জেড</string>
@@ -337,7 +337,7 @@
     <string name="collections_pinned">পিন করা</string>
     <string name="collections_tab_all">সব</string>
     <string name="collections_your_collections">আপনার কালেকশনগুলি</string>
-    <string name="compose_about_made_with">Tapframe এবং বন্ধুদের দ্বারা ❤️ দিয়ে তৈরি</string>
+    <string name="compose_about_made_with">Nex Dev Studios এবং বন্ধুদের দ্বারা ❤️ দিয়ে তৈরি</string>
     <string name="compose_about_version_format">সংস্করণ %1$s (%2$s)</string>
     <string name="compose_action_off">বন্ধ</string>
     <string name="compose_action_on">চালু</string>

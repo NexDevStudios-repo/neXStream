@@ -12,6 +12,8 @@ data class XtreamServerAccount(
     val password: String,
     val isActive: Boolean = true,
     val addedAt: Long = 0L,
+    val serverType: String = "xtream",
+    val localM3uContent: String? = null,
 )
 
 @Serializable

@@ -2,6 +2,7 @@ package com.nuvio.app.core.ui
 
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
@@ -10,6 +11,8 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import com.materialkolor.PaletteStyle
+import com.materialkolor.dynamicColorScheme
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -50,20 +53,21 @@ object NuvioTokens {
     object Radius {
         val none = Space.none
         val xs = Space.s4
-        val sm = Space.s6
-        val md = Space.s8
-        val lg = Space.s12
-        val xl = Space.s16
-        val xxl = Space.s24
-        val full = 999.dp
+        val sm = Space.s8
+        val md = Space.s12
+        val lg = Space.s16
+        val xl = Space.s20
+        val xxl = Space.s28
+        val xxxl = Space.s32
+        val full = 9999.dp
 
         val card = xxl
-        val compactCard = lg
+        val compactCard = xl
         val sheet = xxl
-        val dialog = Space.s28
-        val button = xl
+        val dialog = xxxl
+        val button = full
         val chip = full
-        val poster = lg
+        val poster = xl
         val avatar = full
         val playerPanel = xxl
     }
@@ -370,63 +374,73 @@ internal fun defaultNuvioThemeTokens(
     amoled: Boolean,
     colorScheme: ColorScheme?,
 ): NuvioThemeTokens {
-    val background = if (amoled) Color.Black else palette.background
-    val textPrimary = Color(0xFFF5F7F8)
-    val textSecondary = Color(0xFFB8BEC5)
-    val textMuted = Color(0xFF969CA3)
-    val surface = palette.backgroundElevated
-    val surfaceCard = palette.backgroundCard
-    val accent = palette.secondary
-    val accentStrong = palette.secondaryVariant
-    val borderSubtle = Color(0xFF252A2A).copy(alpha = 0.55f)
-    val borderDefault = Color(0xFF252A2A)
-    val overlayScrim = Color.Black.copy(alpha = NuvioTokens.Opacity.overlayMedium)
+    val scheme = colorScheme ?: dynamicColorScheme(
+        seedColor = palette.secondary,
+        isDark = true,
+        isAmoled = amoled,
+        style = PaletteStyle.Expressive,
+    )
+    val background = scheme.background
+    val textPrimary = scheme.onSurface
+    val textSecondary = scheme.onSurfaceVariant
+    val textMuted = scheme.onSurfaceVariant.copy(alpha = 0.75f)
+    val surface = scheme.surfaceContainer
+    val surfaceElevated = scheme.surfaceContainerHigh
+    val surfaceCard = scheme.surfaceContainerLow
+    val surfaceSheet = scheme.surfaceContainerHigh
+    val surfaceDialog = scheme.surfaceContainerHigh
+    val surfacePopover = scheme.surfaceContainerHighest
+    val accent = scheme.primary
+    val accentStrong = scheme.secondary
+    val borderSubtle = scheme.outlineVariant.copy(alpha = 0.5f)
+    val borderDefault = scheme.outlineVariant
+    val overlayScrim = scheme.scrim.copy(alpha = 0.5f)
 
     return NuvioThemeTokens(
         colors = NuvioColorTokens(
             background = background,
-            backgroundAmoled = Color.Black,
+            backgroundAmoled = if (amoled) Color.Black else scheme.background,
             surface = surface,
-            surfaceElevated = surface,
+            surfaceElevated = surfaceElevated,
             surfaceCard = surfaceCard,
-            surfaceSheet = surface,
-            surfaceDialog = surface,
-            surfacePopover = surfaceCard,
-            nativeChrome = background,
+            surfaceSheet = surfaceSheet,
+            surfaceDialog = surfaceDialog,
+            surfacePopover = surfacePopover,
+            nativeChrome = scheme.surfaceContainerHighest,
             textPrimary = textPrimary,
             textSecondary = textSecondary,
             textMuted = textMuted,
-            textDisabled = textMuted.copy(alpha = NuvioTokens.Opacity.disabled),
-            textInverse = Color(0xFF111111),
+            textDisabled = scheme.onSurface.copy(alpha = 0.38f),
+            textInverse = scheme.inverseOnSurface,
             accent = accent,
             accentStrong = accentStrong,
-            onAccent = palette.onSecondary,
-            focusRing = palette.focusRing,
-            focusBackground = palette.focusBackground,
+            onAccent = scheme.onPrimary,
+            focusRing = scheme.primary,
+            focusBackground = scheme.primaryContainer,
             borderSubtle = borderSubtle,
             borderDefault = borderDefault,
-            borderStrong = Color(0xFF3A4040),
-            borderFocus = palette.focusRing,
-            borderSelected = accent.copy(alpha = NuvioTokens.Opacity.strong),
+            borderStrong = scheme.outline,
+            borderFocus = scheme.primary,
+            borderSelected = scheme.primary,
             success = Color(0xFF66BB6A),
             warning = Color(0xFFFFC857),
-            danger = colorScheme?.error ?: Color(0xFFE36A8A),
-            info = Color(0xFF42A5F5),
+            danger = scheme.error,
+            info = scheme.tertiary,
             neutral = textMuted,
             overlayScrim = overlayScrim,
-            overlayHover = Color.White.copy(alpha = NuvioTokens.Opacity.hover),
-            overlayPressed = Color.White.copy(alpha = NuvioTokens.Opacity.pressed),
-            overlaySelected = Color.White.copy(alpha = NuvioTokens.Opacity.selected),
-            overlayDisabled = Color.Black.copy(alpha = NuvioTokens.Opacity.disabled),
-            shimmer = Color.White.copy(alpha = 0.10f),
-            skeleton = Color.White.copy(alpha = 0.06f),
-            playerControlsBackground = Color.Black.copy(alpha = 0.72f),
-            playerControlsForeground = Color.White,
-            playerTimelineTrack = Color.White.copy(alpha = 0.30f),
-            playerTimelineFill = accent,
-            playerSubtitlePreview = Color.Black.copy(alpha = 0.55f),
-            playerBuffering = accent,
-            parentalGuide = Color(0xFF5D1F1F),
+            overlayHover = scheme.onSurface.copy(alpha = 0.08f),
+            overlayPressed = scheme.onSurface.copy(alpha = 0.12f),
+            overlaySelected = scheme.primary.copy(alpha = 0.16f),
+            overlayDisabled = Color.Black.copy(alpha = 0.38f),
+            shimmer = scheme.onSurface.copy(alpha = 0.10f),
+            skeleton = scheme.onSurface.copy(alpha = 0.06f),
+            playerControlsBackground = scheme.surfaceContainerHighest.copy(alpha = 0.85f),
+            playerControlsForeground = scheme.onSurface,
+            playerTimelineTrack = scheme.surfaceContainerHighest,
+            playerTimelineFill = scheme.primary,
+            playerSubtitlePreview = scheme.surfaceContainerHigh.copy(alpha = 0.75f),
+            playerBuffering = scheme.primary,
+            parentalGuide = scheme.errorContainer,
         ),
         spacing = NuvioSpacingTokens(
             screenHorizontal = NuvioTokens.Space.s16,
@@ -443,15 +457,15 @@ internal fun defaultNuvioThemeTokens(
             playerOverlayPadding = NuvioTokens.Space.s24,
         ),
         shapes = NuvioShapeTokens(
-            card = RoundedCornerShape(NuvioTokens.Radius.card),
-            compactCard = RoundedCornerShape(NuvioTokens.Radius.compactCard),
-            sheet = RoundedCornerShape(NuvioTokens.Radius.sheet),
-            dialog = RoundedCornerShape(NuvioTokens.Radius.dialog),
-            button = RoundedCornerShape(NuvioTokens.Radius.button),
-            chip = RoundedCornerShape(NuvioTokens.Radius.chip),
-            poster = RoundedCornerShape(NuvioTokens.Radius.poster),
-            avatar = RoundedCornerShape(NuvioTokens.Radius.avatar),
-            playerPanel = RoundedCornerShape(NuvioTokens.Radius.playerPanel),
+            card = RoundedCornerShape(NuvioTokens.Radius.xxl),
+            compactCard = RoundedCornerShape(NuvioTokens.Radius.lg),
+            sheet = RoundedCornerShape(topStart = NuvioTokens.Radius.xxxl, topEnd = NuvioTokens.Radius.xxxl),
+            dialog = RoundedCornerShape(NuvioTokens.Radius.xxl),
+            button = CircleShape,
+            chip = CircleShape,
+            poster = RoundedCornerShape(NuvioTokens.Radius.lg),
+            avatar = CircleShape,
+            playerPanel = RoundedCornerShape(NuvioTokens.Radius.xxl),
         ),
         borders = NuvioBorderTokens(
             hairline = NuvioTokens.Border.hairline,

@@ -19,14 +19,20 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.gestures.stopScroll
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -131,6 +137,7 @@ fun NuvioPosterCard(
     bottomLeftLogoUrl: String? = null,
     bottomLeftText: String? = null,
     isWatched: Boolean = false,
+    isChannel: Boolean = false,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
 ) {
@@ -166,7 +173,9 @@ fun NuvioPosterCard(
                 ),
             contentAlignment = Alignment.Center,
         ) {
-            if (imageUrl != null) {
+            var imageLoadError by remember(imageUrl) { mutableStateOf(false) }
+            val isChannelItem = isChannel
+            if (!imageUrl.isNullOrBlank() && !imageLoadError) {
                 val platformContext = coil3.compose.LocalPlatformContext.current
                 val hasFallback = !fallbackImageUrl.isNullOrBlank() && fallbackImageUrl != imageUrl
                 val imageModel = remember(imageUrl, fallbackImageUrl, platformContext) {
@@ -181,21 +190,36 @@ fun NuvioPosterCard(
                         imageUrl
                     }
                 }
-                AsyncImage(
-                    model = imageModel,
-                    contentDescription = title,
-                    modifier = Modifier.matchParentSize(),
-                    contentScale = ContentScale.Crop,
-                )
+                if (isChannelItem) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.5f))
+                            .padding(14.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        AsyncImage(
+                            model = imageModel,
+                            contentDescription = title,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Fit,
+                            onError = { imageLoadError = true },
+                        )
+                    }
+                } else {
+                    AsyncImage(
+                        model = imageModel,
+                        contentDescription = title,
+                        modifier = Modifier.matchParentSize(),
+                        contentScale = ContentScale.Crop,
+                        onError = { imageLoadError = true },
+                    )
+                }
             } else {
-                Text(
-                    text = title,
-                    modifier = Modifier.padding(horizontal = NuvioTokens.Space.s14),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = tokens.colors.textMuted,
-                    textAlign = TextAlign.Center,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
+                NuvioMediaPlaceholder(
+                    title = title,
+                    modifier = Modifier.matchParentSize(),
+                    isChannel = isChannelItem,
                 )
             }
 
@@ -277,20 +301,20 @@ private fun NuvioShelfSectionHeader(
     onViewAllClick: (() -> Unit)? = null,
     viewAllPillSize: NuvioViewAllPillSize = NuvioViewAllPillSize.Default,
 ) {
-    val tokens = MaterialTheme.nuvio
     Column(
         modifier = modifier.fillMaxWidth(),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(tokens.spacing.controlGap),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = title,
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.titleLarge,
-                color = tokens.colors.textPrimary,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -316,17 +340,16 @@ private fun NuvioViewAllPill(
     size: NuvioViewAllPillSize,
     modifier: Modifier = Modifier,
 ) {
-    val tokens = MaterialTheme.nuvio
-    val actionSize = if (size == NuvioViewAllPillSize.Compact) NuvioTokens.Space.s32 else NuvioTokens.Space.s40
-    val iconSize = if (size == NuvioViewAllPillSize.Compact) NuvioTokens.Icon.sm else tokens.icons.md
+    val actionSize = if (size == NuvioViewAllPillSize.Compact) 32.dp else 40.dp
+    val iconSize = if (size == NuvioViewAllPillSize.Compact) 18.dp else 22.dp
     val viewAllText = stringResource(Res.string.home_view_all)
 
     Box(
         modifier = modifier
             .size(actionSize)
             .background(
-                color = tokens.colors.surface,
-                shape = RoundedCornerShape(NuvioTokens.Radius.xl),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                shape = CircleShape,
             )
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         contentAlignment = Alignment.Center,
@@ -334,7 +357,7 @@ private fun NuvioViewAllPill(
         Icon(
             imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
             contentDescription = viewAllText,
-            tint = tokens.colors.textMuted,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(iconSize),
         )
     }

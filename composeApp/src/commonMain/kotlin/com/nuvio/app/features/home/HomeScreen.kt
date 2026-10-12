@@ -34,13 +34,6 @@ import com.nuvio.app.core.ui.nuvioSafeBottomPadding
 import com.nuvio.app.core.ui.rememberHeroStretchState
 import com.nuvio.app.core.ui.rememberPosterCardStyleUiState
 import com.nuvio.app.core.ui.withDuplicateSafeLazyKeys
-import com.nuvio.app.features.addons.AddonRepository
-import com.nuvio.app.features.addons.enabledAddons
-import com.nuvio.app.features.addons.firstEnabledManifestError
-import com.nuvio.app.features.cloud.CloudLibraryContentType
-import com.nuvio.app.features.cloud.CloudLibraryRepository
-import com.nuvio.app.features.cloud.CloudLibraryUiState
-import com.nuvio.app.features.cloud.findPlaybackTargetForProgress
 import com.nuvio.app.features.details.MetaDetails
 import com.nuvio.app.features.details.MetaDetailsRepository
 import com.nuvio.app.features.details.MetaVideo
@@ -126,7 +119,7 @@ fun HomeScreen(
     onFirstCatalogRendered: (() -> Unit)? = null,
 ) {
     LaunchedEffect(Unit) {
-        AddonRepository.initialize()
+        HomeRepository.initialize()
         CollectionRepository.initialize()
         ContinueWatchingPreferencesRepository.ensureLoaded()
         WatchedRepository.ensureLoaded()
@@ -137,7 +130,6 @@ fun HomeScreen(
         }
     }
 
-    val addonsUiState by AddonRepository.uiState.collectAsStateWithLifecycle()
     val homeUiState by HomeRepository.uiState.collectAsStateWithLifecycle()
     val homeSettingsUiState by remember {
         HomeCatalogSettingsRepository.snapshot()
@@ -159,7 +151,6 @@ fun HomeScreen(
     val fullyWatchedSeriesKeys by WatchedRepository.fullyWatchedSeriesKeys.collectAsStateWithLifecycle()
     val watchProgressUiState by WatchProgressRepository.uiState.collectAsStateWithLifecycle()
     val effectiveWatchProgressSource = watchProgressUiState.source
-    val cloudLibraryUiState by CloudLibraryRepository.uiState.collectAsStateWithLifecycle()
     val networkStatusUiState by NetworkStatusRepository.uiState.collectAsStateWithLifecycle()
     val trackingSettingsUiState by remember {
         TrackingSettingsRepository.ensureLoaded()
@@ -186,7 +177,7 @@ fun HomeScreen(
             NetworkCondition.Online -> {
                 if (observedOfflineState) {
                     observedOfflineState = false
-                    HomeRepository.refresh(addonsUiState.addons.enabledAddons(), force = true)
+                    HomeRepository.refresh(force = true)
                 }
             }
 
@@ -279,12 +270,7 @@ fun HomeScreen(
         }
     }
 
-    ScreenActivityEffect(visibleContinueWatchingEntries) { active ->
-        if (!active) return@ScreenActivityEffect
-        if (visibleContinueWatchingEntries.any(WatchProgressEntry::isCloudLibraryProgressEntry)) {
-            CloudLibraryRepository.ensureLoaded()
-        }
-    }
+
 
     val latestCompletedAtBySeries = remember(allNextUpSeedCandidates) {
         allNextUpSeedCandidates
@@ -505,7 +491,6 @@ fun HomeScreen(
         effectivNextUpItems,
         nextUpSuppressedSeriesIds,
         continueWatchingPreferences.sortMode,
-        cloudLibraryUiState,
         cwPosterPattern,
     ) {
         buildHomeContinueWatchingItems(
@@ -515,7 +500,6 @@ fun HomeScreen(
             nextUpSuppressedSeriesIds = nextUpSuppressedSeriesIds,
             sortMode = continueWatchingPreferences.sortMode,
             todayIsoDate = CurrentDateProvider.todayIsoDate(),
-            cloudLibraryUiState = cloudLibraryUiState,
         ).let { items ->
             items.withCustomPosterUrls(cwPosterPattern)
         }
@@ -575,32 +559,10 @@ fun HomeScreen(
             }
         }
     }
-    val enabledAddons = remember(addonsUiState.addons) {
-        addonsUiState.addons.enabledAddons()
-    }
-    val availableManifests = remember(enabledAddons) {
-        enabledAddons.mapNotNull { addon -> addon.manifest }
-    }
-
-    val metaProviderKey = remember(availableManifests) {
-        availableManifests
-            .filter { manifest -> manifest.resources.any { resource -> resource.name == "meta" } }
-            .map { manifest -> manifest.transportUrl }
-            .sorted()
-    }
-    val metaProviderReadinessKey = remember(enabledAddons) {
-        enabledAddons
-            .sortedBy { addon -> addon.manifestUrl }
-            .joinToString(separator = "|") { addon ->
-                "${addon.manifestUrl}:${addon.manifest != null}:${addon.isRefreshing}:${addon.errorMessage.orEmpty()}"
-            }
-    }
     var nextUpResolutionRetryAttempt by remember(
         activeProfileId,
         effectiveWatchProgressSource,
         completedSeriesCandidates,
-        metaProviderKey,
-        metaProviderReadinessKey,
         networkStatusUiState.condition,
         continueWatchingPreferences.showUnairedNextUp,
         continueWatchingPreferences.upNextFromFurthestEpisode,
@@ -619,8 +581,6 @@ fun HomeScreen(
     ScreenActivityEffect(
         preparedProjectionGeneration,
         completedSeriesCandidates,
-        metaProviderKey,
-        metaProviderReadinessKey,
         networkStatusUiState.condition,
         nextUpResolutionRetryAttempt,
         continueWatchingPreferences.showUnairedNextUp,
@@ -859,10 +819,7 @@ fun HomeScreen(
         }
     }
 
-    val hasActiveAddons = enabledAddons.any { it.manifest != null }
-    val addonManifestsLoading = enabledAddons.any { it.isRefreshing }
-    val addonManifestErrorMessage = enabledAddons.firstEnabledManifestError()
-    val isResolvingHeroSources = addonManifestsLoading || homeUiState.isLoading
+    val isResolvingHeroSources = homeUiState.isLoading
     var firstCatalogReported by remember { mutableStateOf(false) }
 
     LaunchedEffect(homeUiState.sections.firstOrNull()?.key, onFirstCatalogRendered) {
@@ -930,7 +887,6 @@ fun HomeScreen(
         isResolvingHeroSources
     val isInitialHomeContentLoading = shouldShowInitialHomeLoading(
         hasRenderableHomeRows = hasRenderableHomeRows,
-        addonManifestsLoading = addonManifestsLoading,
         homeCatalogLoading = homeUiState.isLoading,
     )
 
@@ -1041,57 +997,6 @@ fun HomeScreen(
                     }
                 }
 
-                !hasActiveAddons && !hasRenderableCollectionRows -> {
-                    homeContinueWatchingSections(
-                        preferences = continueWatchingPreferences,
-                        continueWatchingItems = continueWatchingItems,
-                        upcomingItems = upcomingItems,
-                        dataSourceKey = effectiveWatchProgressSource,
-                        sectionPadding = homeSectionPadding,
-                        layout = continueWatchingLayout,
-                        continueWatchingListState = continueWatchingListState,
-                        upcomingListState = upcomingListState,
-                        onItemClick = onContinueWatchingClick,
-                        onItemLongPress = onContinueWatchingLongPress,
-                        disintegrationRequest = continueWatchingDisintegrationRequest,
-                    )
-                    item(key = "home_empty", contentType = "empty") {
-                        when {
-                            networkStatusUiState.isOfflineLike && addonManifestErrorMessage != null -> {
-                                NuvioNetworkOfflineCard(
-                                    condition = networkStatusUiState.condition,
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    onRetry = {
-                                        NetworkStatusRepository.requestRefresh(force = true)
-                                        AddonRepository.refreshAll()
-                                    },
-                                )
-                            }
-
-                            addonManifestErrorMessage != null -> {
-                                HomeEmptyStateCard(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    title = stringResource(Res.string.home_load_failed_title),
-                                    message = addonManifestErrorMessage,
-                                    actionLabel = stringResource(Res.string.action_retry),
-                                    onActionClick = {
-                                        NetworkStatusRepository.requestRefresh(force = true)
-                                        AddonRepository.refreshAll()
-                                    },
-                                )
-                            }
-
-                            else -> {
-                                HomeEmptyStateCard(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    title = stringResource(Res.string.compose_search_empty_no_active_addons_title),
-                                    message = stringResource(Res.string.home_empty_no_active_addons_message),
-                                )
-                            }
-                        }
-                    }
-                }
-
                 homeUiState.sections.isEmpty() && homeUiState.heroItems.isEmpty() &&
                     (!continueWatchingPreferences.isVisible || !hasContinueWatchingRows) &&
                     !hasRenderableCollectionRows -> {
@@ -1103,7 +1008,7 @@ fun HomeScreen(
                                 modifier = Modifier.padding(horizontal = 16.dp),
                                 onRetry = {
                                     NetworkStatusRepository.requestRefresh(force = true)
-                                    HomeRepository.refresh(addonsUiState.addons.enabledAddons(), force = true)
+                                    HomeRepository.refresh(force = true)
                                 },
                             )
                         } else {
@@ -1122,7 +1027,7 @@ fun HomeScreen(
                                 onActionClick = if (loadFailed) {
                                     {
                                         NetworkStatusRepository.requestRefresh(force = true)
-                                        HomeRepository.refresh(addonsUiState.addons.enabledAddons(), force = true)
+                                        HomeRepository.refresh(force = true)
                                     }
                                 } else {
                                     null
@@ -1147,25 +1052,10 @@ fun HomeScreen(
                         disintegrationRequest = continueWatchingDisintegrationRequest,
                     )
 
-                    keyedEnabledHomeItems.forEach { keyedSettingsItem ->
-                        val settingsItem = keyedSettingsItem.value
-                        if (settingsItem.isCollection) {
-                            val collection = collectionsMap[settingsItem.key]
-                            if (collection != null) {
-                                item(key = keyedSettingsItem.lazyKey, contentType = "collection") {
-                                    HomeCollectionRowSection(
-                                        collection = collection,
-                                        modifier = Modifier.padding(bottom = 12.dp),
-                                        sectionPadding = homeSectionPadding,
-                                        animateGifs = animateCollectionGifs,
-                                        onFolderClick = onFolderClick,
-                                    )
-                                }
-                            }
-                        } else {
-                            val section = sectionsMap[settingsItem.key]
-                            if (section != null && section.items.isNotEmpty()) {
-                                item(key = keyedSettingsItem.lazyKey, contentType = "catalog") {
+                    if (homeUiState.sections.isNotEmpty()) {
+                        homeUiState.sections.forEach { section ->
+                            if (section.items.isNotEmpty()) {
+                                item(key = section.key, contentType = "catalog") {
                                     HomeCatalogRowSection(
                                         section = section,
                                         entries = section.items.take(HOME_CATALOG_PREVIEW_LIMIT),
@@ -1181,6 +1071,45 @@ fun HomeScreen(
                                         onPosterClick = onPosterClick,
                                         onPosterLongClick = onPosterLongClick,
                                     )
+                                }
+                            }
+                        }
+                    } else {
+                        keyedEnabledHomeItems.forEach { keyedSettingsItem ->
+                            val settingsItem = keyedSettingsItem.value
+                            if (settingsItem.isCollection) {
+                                val collection = collectionsMap[settingsItem.key]
+                                if (collection != null) {
+                                    item(key = keyedSettingsItem.lazyKey, contentType = "collection") {
+                                        HomeCollectionRowSection(
+                                            collection = collection,
+                                            modifier = Modifier.padding(bottom = 12.dp),
+                                            sectionPadding = homeSectionPadding,
+                                            animateGifs = animateCollectionGifs,
+                                            onFolderClick = onFolderClick,
+                                        )
+                                    }
+                                }
+                            } else {
+                                val section = sectionsMap[settingsItem.key]
+                                if (section != null && section.items.isNotEmpty()) {
+                                    item(key = keyedSettingsItem.lazyKey, contentType = "catalog") {
+                                        HomeCatalogRowSection(
+                                            section = section,
+                                            entries = section.items.take(HOME_CATALOG_PREVIEW_LIMIT),
+                                            modifier = Modifier.padding(bottom = 12.dp),
+                                            sectionPadding = homeSectionPadding,
+                                            onViewAllClick = if (section.canOpenCatalog(HOME_CATALOG_PREVIEW_LIMIT)) {
+                                                onCatalogClick?.let { { it(section) } }
+                                            } else {
+                                                null
+                                            },
+                                            watchedKeys = watchedUiState.watchedKeys,
+                                            fullyWatchedSeriesKeys = fullyWatchedSeriesKeys,
+                                            onPosterClick = onPosterClick,
+                                            onPosterLongClick = onPosterLongClick,
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -1566,7 +1495,6 @@ internal fun buildHomeContinueWatchingItems(
     nextUpSuppressedSeriesIds: Set<String>? = null,
     sortMode: ContinueWatchingSortMode = ContinueWatchingSortMode.DEFAULT,
     todayIsoDate: String = "",
-    cloudLibraryUiState: CloudLibraryUiState? = null,
 ): List<ContinueWatchingItem> {
     val suppressedSeriesIds = nextUpSuppressedSeriesIds
         ?: visibleEntries
@@ -1586,8 +1514,7 @@ internal fun buildHomeContinueWatchingItems(
                         .withFallbackMetadata(
                             fallback = cachedInProgressByProgressKey[entry.resolvedProgressKey()],
                             preserveFallbackPlaybackIdentity = true,
-                        )
-                        .withCloudLibraryMetadata(cloudLibraryUiState),
+                        ),
                     isProgressEntry = true,
                 )
             },
@@ -1978,33 +1905,7 @@ private fun String?.nonBlankOrNull(): String? = this?.takeIf { it.isNotBlank() }
 private fun String?.orNonBlank(fallback: String?): String? =
     nonBlankOrNull() ?: fallback.nonBlankOrNull()
 
-private fun ContinueWatchingItem.withCloudLibraryMetadata(
-    cloudLibraryUiState: CloudLibraryUiState?,
-): ContinueWatchingItem {
-    if (!isCloudLibraryContinueWatchingItem() || cloudLibraryUiState == null) return this
-    val target = cloudLibraryUiState.findPlaybackTargetForProgress(
-        contentId = parentMetaId,
-        videoId = videoId,
-    ) ?: return this
-    val fileName = target.file.name.trim().takeIf { it.isNotBlank() }
-        ?: target.item.name.trim().takeIf { it.isNotBlank() }
-        ?: return this
-    return copy(
-        title = fileName,
-        pauseDescription = pauseDescription
-            ?: target.item.name.takeIf { itemName -> itemName.isNotBlank() && itemName != fileName },
-    )
-}
-
 private fun ContinueWatchingItem.hasPlaceholderHomeTitle(): Boolean {
     val normalizedTitle = title.trim()
-    return normalizedTitle.equals(parentMetaId, ignoreCase = true) ||
-        (isCloudLibraryContinueWatchingItem() && normalizedTitle.equals(videoId, ignoreCase = true))
+    return normalizedTitle.equals(parentMetaId, ignoreCase = true)
 }
-
-private fun ContinueWatchingItem.isCloudLibraryContinueWatchingItem(): Boolean =
-    parentMetaType.equals(CloudLibraryContentType, ignoreCase = true)
-
-private fun WatchProgressEntry.isCloudLibraryProgressEntry(): Boolean =
-    contentType.equals(CloudLibraryContentType, ignoreCase = true) ||
-        parentMetaType.equals(CloudLibraryContentType, ignoreCase = true)

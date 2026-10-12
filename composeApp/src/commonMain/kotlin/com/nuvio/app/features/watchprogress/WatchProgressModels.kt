@@ -1,8 +1,6 @@
 package com.nuvio.app.features.watchprogress
 
 import com.nuvio.app.core.i18n.localizedSeasonEpisodeCode
-import com.nuvio.app.features.cloud.CloudLibraryContentType
-import com.nuvio.app.features.cloud.cloudLibraryProviderPosterUrl
 import com.nuvio.app.features.details.MetaVideo
 import com.nuvio.app.features.tracking.TrackingAttributedItem
 import com.nuvio.app.features.tracking.WatchProgressSource
@@ -259,8 +257,7 @@ internal fun nextUpDismissKey(
 
 internal fun WatchProgressEntry.toContinueWatchingItem(): ContinueWatchingItem {
     val normalizedEntry = normalizedCompletion()
-    val cloudPosterUrl = normalizedEntry.cloudLibraryPosterFallbackUrl().nonBlankOrNull()
-    val resolvedPoster = normalizedEntry.poster.nonBlankOrNull() ?: cloudPosterUrl
+    val resolvedPoster = normalizedEntry.poster.nonBlankOrNull()
     val resolvedBackground = normalizedEntry.background.nonBlankOrNull()
     val resolvedEpisodeThumbnail = normalizedEntry.episodeThumbnail.nonBlankOrNull()
     val explicitResumeProgressFraction = normalizedEntry.normalizedProgressPercent
@@ -297,16 +294,6 @@ internal fun WatchProgressEntry.toContinueWatchingItem(): ContinueWatchingItem {
         isReleaseAlert = false,
         isNewSeasonRelease = false,
     )
-}
-
-private fun WatchProgressEntry.cloudLibraryPosterFallbackUrl(): String? {
-    if (!contentType.equals(CloudLibraryContentType, ignoreCase = true) &&
-        !parentMetaType.equals(CloudLibraryContentType, ignoreCase = true)
-    ) {
-        return null
-    }
-    return cloudLibraryProviderPosterUrl(parentMetaId)
-        ?: cloudLibraryProviderPosterUrl(providerAddonId)
 }
 
 internal fun WatchProgressEntry.toUpNextContinueWatchingItem(

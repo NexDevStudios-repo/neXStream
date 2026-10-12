@@ -1,4 +1,4 @@
-﻿<resources>
+<resources>
     <string name="theme_gold">Oro</string>
     <string name="theme_jade">Jade</string>
     <string name="theme_rose_gold">Oro rosa</string>
@@ -9,7 +9,7 @@
     <string name="profile_background_normal">Normal</string>
     <string name="profile_background_custom">Personalizado</string>
     <string name="about_licenses_attributions_subtitle">Fuentes de datos, reconocimientos y licencias de plataforma</string>
-    <string name="about_supporters_contributors_subtitle">Reconocimiento abierto y créditos del proyecto</string>
+    <string name="about_supporters_contributors_subtitle">Apoya a Nex Dev Studios mediante Cafecito</string>
     <string name="action_back">Atrás</string>
     <string name="action_cancel">Cancelar</string>
     <string name="action_close">Cerrar</string>
@@ -334,7 +334,7 @@
     <string name="collections_pinned">Fijado</string>
     <string name="collections_tab_all">Todo</string>
     <string name="collections_your_collections">Tus colecciones</string>
-    <string name="compose_about_made_with">Hecho con ❤️ por Tapframe y amigos</string>
+    <string name="compose_about_made_with">Hecho con ❤️ por Nex Dev Studios</string>
     <string name="compose_about_version_format">Versión %1$s (%2$s)</string>
     <string name="compose_action_off">Desactivado</string>
     <string name="compose_action_on">Activado</string>
@@ -496,14 +496,14 @@
     <string name="compose_settings_category_about">Acerca de</string>
     <string name="compose_settings_category_general">General</string>
     <string name="compose_settings_page_account">Cuenta</string>
-    <string name="compose_settings_page_addons">Complementos</string>
+    <string name="compose_settings_page_addons">Servidores IPTV</string>
     <string name="compose_settings_page_advanced">Avanzado</string>
     <string name="compose_settings_page_appearance">Apariencia</string>
     <string name="compose_settings_page_content_discovery">Contenido y descubrimiento</string>
     <string name="compose_settings_page_continue_watching">Seguir viendo</string>
     <string name="compose_settings_page_debrid">Servicios conectados</string>
     <string name="compose_settings_page_homescreen">Pantalla de inicio</string>
-    <string name="compose_settings_page_integrations">Integraciones</string>
+    <string name="compose_settings_page_integrations">Configuración IPTV / Xtream</string>
     <string name="compose_settings_page_licenses_attributions">Licencias y atribución</string>
     <string name="compose_settings_page_mdblist_ratings">Calificaciones de MDBList</string>
     <string name="compose_settings_page_meta_screen">Pantalla meta</string>
@@ -516,7 +516,7 @@
     <string name="compose_settings_page_root">Configuración</string>
     <string name="compose_settings_page_streams">Corrientes</string>
     <string name="settings_appearance_section_streams">CORRIENTES</string>
-    <string name="compose_settings_page_supporters_contributors">Patrocinadores y colaboradores</string>
+    <string name="compose_settings_page_supporters_contributors">Patrocinadores</string>
     <string name="compose_settings_page_tmdb_enrichment">Enriquecimiento TMDB</string>
     <string name="compose_settings_page_trakt">Trakt</string>
     <string name="compose_settings_page_tracking">Seguimiento</string>
@@ -658,18 +658,18 @@
     <string name="settings_account_status">Estado</string>
     <string name="settings_account_status_anonymous">Anónimo</string>
     <string name="settings_account_status_signed_in">Sesión iniciada</string>
-    <string name="settings_appearance_amoled_black">Negro AMOLED</string>
-    <string name="settings_appearance_amoled_description">Usa fondos negros puros para pantallas OLED.</string>
+    <string name="settings_appearance_amoled_black">Tema Oscuro</string>
+    <string name="settings_appearance_amoled_description">Alternar entre apariencia oscura y clara.</string>
     <string name="settings_appearance_app_icon">Icono de la app</string>
-    <string name="settings_appearance_app_icon_arctic_blue">Azul ártico</string>
+    <string name="settings_appearance_app_icon_arctic_blue">Aqua</string>
     <string name="settings_appearance_app_icon_android_confirmation_message">Cambiar a %1$s cerrará neXStream. Pulsa Aceptar para continuar.</string>
     <string name="settings_appearance_app_icon_android_confirmation_title">¿Cambiar icono de la app?</string>
     <string name="settings_appearance_app_icon_change_failed">No se pudo cambiar el icono. Por favor, inténtalo de nuevo.</string>
-    <string name="settings_appearance_app_icon_copper">Cobre</string>
-    <string name="settings_appearance_app_icon_emerald">Esmeralda</string>
-    <string name="settings_appearance_app_icon_graphite">Grafito</string>
+    <string name="settings_appearance_app_icon_copper">Cielo</string>
+    <string name="settings_appearance_app_icon_emerald">Green</string>
+    <string name="settings_appearance_app_icon_graphite">Noche</string>
     <string name="settings_appearance_app_icon_original">Original</string>
-    <string name="settings_appearance_app_icon_rose_gold">Oro rosa</string>
+    <string name="settings_appearance_app_icon_rose_gold">Sol</string>
     <string name="settings_appearance_app_icon_sheet_title">Elegir icono de la app</string>
     <string name="settings_appearance_app_language">Idioma de la app</string>
     <string name="settings_appearance_app_language_device">Idioma del dispositivo</string>
@@ -1360,6 +1360,7 @@
     <string name="theme_rose">Rosa</string>
     <string name="theme_violet">Violeta</string>
     <string name="theme_white">Blanco</string>
+    <string name="theme_material_you">Material You (Dinámico)</string>
     <string name="theme_custom">Personalizado</string>
     <string name="custom_theme_title">Tu degradado personalizado</string>
     <string name="custom_theme_subtitle">Elige tres colores para tu tema. Selecciona un color para editarlo.</string>
@@ -1518,9 +1519,9 @@
     <string name="home_continue_watching_watched">%1$s visto</string>
     <string name="home_continue_watching_hours_minutes_left">Falta %1$dh %2$dm</string>
     <string name="home_continue_watching_minutes_left">Faltan %1$dm</string>
-    <string name="home_empty_no_active_addons_message">Instala y valida al menos un addon antes de cargar filas de catálogo en Inicio.</string>
-    <string name="home_empty_no_rows_message">Los addons instalados no exponen actualmente catálogos compatibles con el tablero sin extras requeridos.</string>
-    <string name="home_empty_no_rows_title">No hay filas de inicio disponibles</string>
+    <string name="home_empty_no_active_addons_message">Agrega o activa un servidor IPTV Xtream o lista M3U en Ajustes para ver canales y catálogos en Inicio.</string>
+    <string name="home_empty_no_rows_message">Agrega un servidor Xtream Codes, enlace M3U o archivo local en Ajustes > Servidores IPTV para cargar tu contenido.</string>
+    <string name="home_empty_no_rows_title">Sin contenido IPTV disponible</string>
     <string name="home_load_failed_title">No se pudo cargar Inicio</string>
     <string name="home_view_details">Ver detalles</string>
     <string name="meta_section_actions_description">Controles para reproducir y guardar.</string>
@@ -1592,8 +1593,8 @@
     <string name="profile_select_avatar">Selecciona un avatar para este perfil.</string>
     <string name="profile_set_pin_lock">Configurar bloqueo PIN</string>
     <string name="profile_unnamed">Perfil sin nombre</string>
-    <string name="profile_use_primary_addons">Usar addons principales</string>
-    <string name="profile_use_primary_addons_description">Comparte la configuración de addons del perfil principal en lugar de gestionar una lista separada.</string>
+    <string name="profile_use_primary_addons">Compartir servidores IPTV</string>
+    <string name="profile_use_primary_addons_description">Comparte los servidores Xtream y listas del perfil principal en lugar de configurar una lista independiente para este perfil.</string>
     <string name="profile_who_is_watching">¿Quién está viendo?</string>
     <string name="profile_already_active">Ya estás en &quot;%1$s&quot;</string>
     <string name="provider_downloaded">Descargado</string>

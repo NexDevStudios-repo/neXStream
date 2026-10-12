@@ -11,6 +11,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,8 +40,36 @@ internal fun LazyListScope.notificationsSettingsContent(
     uiState: EpisodeReleaseNotificationsUiState,
 ) {
     item {
+        var expiryAlertsEnabled by rememberSaveable { mutableStateOf(true) }
+        var connectionLimitAlertsEnabled by rememberSaveable { mutableStateOf(true) }
+
         SettingsSection(
-            title = stringResource(Res.string.settings_notifications_section_alerts),
+            title = "Cuenta IPTV y Servidor",
+            isTablet = isTablet,
+        ) {
+            SettingsGroup(isTablet = isTablet) {
+                SettingsSwitchRow(
+                    title = "Aviso de vencimiento de cuenta",
+                    description = "Notificar antes de que expire la suscripción IPTV del servidor activo",
+                    checked = expiryAlertsEnabled,
+                    isTablet = isTablet,
+                    onCheckedChange = { expiryAlertsEnabled = it },
+                )
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsSwitchRow(
+                    title = "Límite de conexiones activas",
+                    description = "Avisar si se alcanza el número máximo de conexiones simultáneas",
+                    checked = connectionLimitAlertsEnabled,
+                    isTablet = isTablet,
+                    onCheckedChange = { connectionLimitAlertsEnabled = it },
+                )
+            }
+        }
+    }
+
+    item {
+        SettingsSection(
+            title = "Contenido y Biblioteca",
             isTablet = isTablet,
         ) {
             SettingsGroup(isTablet = isTablet) {

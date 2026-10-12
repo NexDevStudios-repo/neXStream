@@ -7,13 +7,10 @@ import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.nuvio.app.features.addons.AddonsUiState
 import com.nuvio.app.features.details.MetaDetails
 import com.nuvio.app.features.details.MetaDetailsUiState
 import com.nuvio.app.features.details.MetaScreenSettingsUiState
 import com.nuvio.app.features.details.MetaVideo
-import com.nuvio.app.features.p2p.P2pSettingsUiState
-import com.nuvio.app.features.p2p.P2pStreamingState
 import com.nuvio.app.features.player.skip.NextEpisodeInfo
 import com.nuvio.app.features.player.skip.SkipInterval
 import com.nuvio.app.features.streams.StreamsUiState
@@ -28,52 +25,58 @@ internal class PlayerScreenRuntime(
 ) {
     var args by mutableStateOf(args)
 
-    val title: String get() = args.title
+    var activeTitle by mutableStateOf(args.title)
+    var activeLogo by mutableStateOf(args.logo)
+    var activePoster by mutableStateOf(args.poster)
+    var activeBackground by mutableStateOf(args.background)
+    var activeParentMetaId by mutableStateOf(args.parentMetaId)
+    var activeParentMetaType by mutableStateOf(args.parentMetaType)
+
+    val title: String get() = activeTitle
     val profileId: Int get() = args.profileId
-    val sourceUrl: String get() = args.sourceUrl
-    val sourceAudioUrl: String? get() = args.sourceAudioUrl
-    val sourceHeaders: Map<String, String> get() = args.sourceHeaders
-    val sourceResponseHeaders: Map<String, String> get() = args.sourceResponseHeaders
-    val streamType: String? get() = args.streamType
-    val providerName: String get() = args.providerName
-    val streamTitle: String get() = args.streamTitle
-    val streamSubtitle: String? get() = args.streamSubtitle
-    val initialBingeGroup: String? get() = args.initialBingeGroup
-    val pauseDescription: String? get() = args.pauseDescription
-    val logo: String? get() = args.logo
-    val poster: String? get() = args.poster
-    val background: String? get() = args.background
-    val seasonNumber: Int? get() = args.seasonNumber
-    val episodeNumber: Int? get() = args.episodeNumber
-    val episodeTitle: String? get() = args.episodeTitle
-    val episodeThumbnail: String? get() = args.episodeThumbnail
+    val sourceUrl: String get() = activeSourceUrl
+    val sourceAudioUrl: String? get() = activeSourceAudioUrl
+    val sourceHeaders: Map<String, String> get() = activeSourceHeaders
+    val sourceResponseHeaders: Map<String, String> get() = activeSourceResponseHeaders
+    val streamType: String? get() = activeStreamType
+    val providerName: String get() = activeProviderName
+    val streamTitle: String get() = activeStreamTitle
+    val streamSubtitle: String? get() = activeStreamSubtitle
+    val initialBingeGroup: String? get() = currentStreamBingeGroup
+    val pauseDescription: String? get() = activePauseDescription
+    val logo: String? get() = activeLogo
+    val poster: String? get() = activePoster
+    val background: String? get() = activeBackground
+    val seasonNumber: Int? get() = activeSeasonNumber
+    val episodeNumber: Int? get() = activeEpisodeNumber
+    val episodeTitle: String? get() = activeEpisodeTitle
+    val episodeThumbnail: String? get() = activeEpisodeThumbnail
     val contentType: String? get() = args.contentType
-    val videoId: String? get() = args.videoId
-    val parentMetaId: String get() = args.parentMetaId
-    val parentMetaType: String get() = args.parentMetaType
-    val providerAddonId: String? get() = args.providerAddonId
-    val torrentInfoHash: String? get() = args.torrentInfoHash
-    val torrentFileIdx: Int? get() = args.torrentFileIdx
-    val torrentFilename: String? get() = args.torrentFilename
-    val torrentTrackers: List<String> get() = args.torrentTrackers
-    val initialPositionMs: Long get() = args.initialPositionMs
-    val initialProgressFraction: Float? get() = args.initialProgressFraction
+    val videoId: String? get() = activeVideoId
+    val parentMetaId: String get() = activeParentMetaId
+    val parentMetaType: String get() = activeParentMetaType
+    val providerAddonId: String? get() = activeProviderAddonId
+    val initialPositionMs: Long get() = activeInitialPositionMs
+    val initialProgressFraction: Float? get() = activeInitialProgressFraction
     var externalSubtitles by mutableStateOf(args.externalSubtitles)
     val isSeries: Boolean get() = parentMetaType == "series"
+    val isLive: Boolean
+        get() = parentMetaType in listOf("channel", "tv", "live") ||
+                contentType in listOf("channel", "tv", "live") ||
+                parentMetaId.startsWith("xtream:channel") ||
+                parentMetaId.startsWith("xtream:live") ||
+                parentMetaId.startsWith("xtream:m3u")
 
     lateinit var scope: CoroutineScope
     lateinit var hapticFeedback: HapticFeedback
 
     var playerSettingsUiState: PlayerSettingsUiState = PlayerSettingsUiState()
-    var p2pSettingsUiState by mutableStateOf(P2pSettingsUiState())
-    var p2pStreamingState by mutableStateOf<P2pStreamingState>(P2pStreamingState.Idle)
     var metaScreenSettingsUiState: MetaScreenSettingsUiState = MetaScreenSettingsUiState()
     var watchedUiState: WatchedUiState = WatchedUiState()
     var watchProgressUiState: WatchProgressUiState = WatchProgressUiState()
     var sourceStreamsState by mutableStateOf(StreamsUiState())
     var episodeStreamsRepoState by mutableStateOf(StreamsUiState())
     var metaUiState: MetaDetailsUiState = MetaDetailsUiState()
-    var addonsUiState: AddonsUiState = AddonsUiState()
     var addonSubtitles: List<AddonSubtitle> = emptyList()
     var isLoadingAddonSubtitles: Boolean = false
 
@@ -97,34 +100,27 @@ internal class PlayerScreenRuntime(
     var controlsVisible by mutableStateOf(false)
     var showRemainingTime by mutableStateOf(false)
     var playerControlsLocked by mutableStateOf(false)
-    var activeSourceUrl by mutableStateOf(sourceUrl)
-    var activeSourceAudioUrl by mutableStateOf(sourceAudioUrl)
-    var activeSourceHeaders by mutableStateOf(sanitizePlaybackHeaders(sourceHeaders))
-    var activeSourceResponseHeaders by mutableStateOf(sanitizePlaybackResponseHeaders(sourceResponseHeaders))
-    var activeStreamType by mutableStateOf(streamType)
-    var activeTorrentInfoHash by mutableStateOf(torrentInfoHash)
-    var activeTorrentFileIdx by mutableStateOf(torrentFileIdx)
-    var activeTorrentFilename by mutableStateOf(torrentFilename)
-    var activeTorrentTrackers by mutableStateOf(torrentTrackers)
-    var p2pResolvedSourceUrl by mutableStateOf<String?>(null)
+    var activeSourceUrl by mutableStateOf(args.sourceUrl)
+    var activeSourceAudioUrl by mutableStateOf(args.sourceAudioUrl)
+    var activeSourceHeaders by mutableStateOf(sanitizePlaybackHeaders(args.sourceHeaders))
+    var activeSourceResponseHeaders by mutableStateOf(sanitizePlaybackResponseHeaders(args.sourceResponseHeaders))
+    var activeStreamType by mutableStateOf(args.streamType)
     var activeSourceIdentityKey by mutableStateOf(
-        torrentInfoHash?.trim()?.lowercase()?.takeIf { it.isNotBlank() }?.let { hash ->
-            "torrent:$hash:${torrentFileIdx ?: -1}"
-        } ?: sourceUrl.trim().takeIf { it.isNotBlank() }?.let { url -> "url:$url" },
+        args.sourceUrl.trim().takeIf { it.isNotBlank() }?.let { url -> "url:$url" },
     )
-    var activeStreamTitle by mutableStateOf(streamTitle)
-    var activeStreamSubtitle by mutableStateOf(streamSubtitle)
-    var activeProviderName by mutableStateOf(providerName)
-    var activeProviderAddonId by mutableStateOf(providerAddonId)
-    var currentStreamBingeGroup by mutableStateOf(initialBingeGroup)
-    var activeSeasonNumber by mutableStateOf(seasonNumber)
-    var activeEpisodeNumber by mutableStateOf(episodeNumber)
-    var activeEpisodeTitle by mutableStateOf(episodeTitle)
-    var activeEpisodeThumbnail by mutableStateOf(episodeThumbnail)
-    var activePauseDescription by mutableStateOf(pauseDescription)
-    var activeVideoId by mutableStateOf(videoId)
-    var activeInitialPositionMs by mutableStateOf(initialPositionMs)
-    var activeInitialProgressFraction by mutableStateOf(initialProgressFraction)
+    var activeStreamTitle by mutableStateOf(args.streamTitle)
+    var activeStreamSubtitle by mutableStateOf(args.streamSubtitle)
+    var activeProviderName by mutableStateOf(args.providerName)
+    var activeProviderAddonId by mutableStateOf(args.providerAddonId)
+    var currentStreamBingeGroup by mutableStateOf(args.initialBingeGroup)
+    var activeSeasonNumber by mutableStateOf(args.seasonNumber)
+    var activeEpisodeNumber by mutableStateOf(args.episodeNumber)
+    var activeEpisodeTitle by mutableStateOf(args.episodeTitle)
+    var activeEpisodeThumbnail by mutableStateOf(args.episodeThumbnail)
+    var activePauseDescription by mutableStateOf(args.pauseDescription)
+    var activeVideoId by mutableStateOf(args.videoId)
+    var activeInitialPositionMs by mutableStateOf(args.initialPositionMs)
+    var activeInitialProgressFraction by mutableStateOf(args.initialProgressFraction)
     var shouldPlay by mutableStateOf(true)
     var resizeMode by mutableStateOf(playerSettingsUiState.resizeMode)
     var layoutSize by mutableStateOf(IntSize.Zero)
@@ -160,6 +156,7 @@ internal class PlayerScreenRuntime(
 
     var showSourcesPanel by mutableStateOf(false)
     var showEpisodesPanel by mutableStateOf(false)
+    var showChannelsPanel by mutableStateOf(false)
     var showSubmitIntroModal by mutableStateOf(false)
     var submitIntroSegmentType by mutableStateOf("intro")
     var submitIntroStartTimeStr by mutableStateOf("00:00")
@@ -186,7 +183,6 @@ internal class PlayerScreenRuntime(
     var nextEpisodeAutoPlayAutomatic by mutableStateOf(false)
     var nextEpisodePreloadJob by mutableStateOf<Job?>(null)
     var nextEpisodePreloadTriggered by mutableStateOf(false)
-    var pendingP2pSwitch by mutableStateOf<PendingPlayerP2pSwitch?>(null)
     var credentialRefreshJob by mutableStateOf<Job?>(null)
     var credentialRefreshAttemptedSourceUrl by mutableStateOf<String?>(null)
 

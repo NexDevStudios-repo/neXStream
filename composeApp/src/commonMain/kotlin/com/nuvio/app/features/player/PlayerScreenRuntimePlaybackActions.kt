@@ -45,9 +45,7 @@ internal fun PlayerScreenRuntime.updatePlaybackSnapshot(
 }
 
 internal val PlayerScreenRuntime.activePlaybackIdentity: String
-    get() = activeTorrentInfoHash
-        ?.let { hash -> "torrent:$hash:${activeTorrentFileIdx ?: -1}" }
-        ?: activeSourceUrl
+    get() = if (parentMetaId.isNotBlank()) "$parentMetaId:$activeSourceUrl" else activeSourceUrl
 
 internal val PlayerScreenRuntime.activePlaybackKey: PlaybackKey
     get() = PlaybackKey(
@@ -105,12 +103,7 @@ internal fun PlayerScreenRuntime.currentLaunch(launch: PlayerLaunch): PlayerLaun
         bingeGroup = currentStreamBingeGroup,
         pauseDescription = activePauseDescription,
         providerName = activeProviderName,
-        providerAddonId = activeProviderAddonId,
         videoId = activeVideoId,
-        torrentInfoHash = activeTorrentInfoHash,
-        torrentFileIdx = activeTorrentFileIdx,
-        torrentFilename = activeTorrentFilename,
-        torrentTrackers = activeTorrentTrackers,
         initialPositionMs = positionMs ?: activeInitialPositionMs,
         initialProgressFraction = activeInitialProgressFraction.takeIf { positionMs == null },
     )

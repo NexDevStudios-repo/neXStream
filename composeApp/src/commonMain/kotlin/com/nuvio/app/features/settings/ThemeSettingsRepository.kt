@@ -28,7 +28,7 @@ object ThemeSettingsRepository {
     private val _customThemeColors = MutableStateFlow(CustomThemeColors.solid(CustomThemeColors.Default.second))
     val customThemeColors: StateFlow<CustomThemeColors> = _customThemeColors.asStateFlow()
 
-    private val _amoledEnabled = MutableStateFlow(false)
+    private val _amoledEnabled = MutableStateFlow(true)
     val amoledEnabled: StateFlow<Boolean> = _amoledEnabled.asStateFlow()
 
     private val _liquidGlassNativeTabBarEnabled = MutableStateFlow(false)
@@ -37,7 +37,7 @@ object ThemeSettingsRepository {
     private val _selectedAppLanguage = MutableStateFlow(AppLanguage.DEVICE)
     val selectedAppLanguage: StateFlow<AppLanguage> = _selectedAppLanguage.asStateFlow()
 
-    private val _navBarStyle = MutableStateFlow(NavBarStyle.ADAPTIVE)
+    private val _navBarStyle = MutableStateFlow(NavBarStyle.EXPANDED)
     val navBarStyle: StateFlow<NavBarStyle> = _navBarStyle.asStateFlow()
 
     private val _navBarGlowEnabled = MutableStateFlow(true)
@@ -62,13 +62,13 @@ object ThemeSettingsRepository {
         _selectedTheme.value = AppTheme.WHITE
         _customThemePreference.value = CustomThemeColors.Default
         _customThemeColors.value = CustomThemeColors.solid(CustomThemeColors.Default.second)
-        _amoledEnabled.value = false
+        _amoledEnabled.value = true
         _liquidGlassNativeTabBarEnabled.value = false
         NativeTabBridge.publishAccentColor(ThemeColors.White.nativeAccentHex)
         NativeTabBridge.publishLiquidGlassEnabled(false)
         _selectedAppLanguage.value = AppLanguage.DEVICE
         _navBarGlowEnabled.value = true
-        _navBarStyle.value = NavBarStyle.ADAPTIVE
+        _navBarStyle.value = NavBarStyle.EXPANDED
     }
 
     private fun loadFromDisk() {
@@ -86,7 +86,7 @@ object ThemeSettingsRepository {
         _selectedThemePreference.value = theme
         _customThemePreference.value = CustomThemeColors.decode(ThemeSettingsStorage.loadCustomThemeColors())
         applyEffectiveTheme()
-        _amoledEnabled.value = ThemeSettingsStorage.loadAmoledEnabled() ?: false
+        _amoledEnabled.value = ThemeSettingsStorage.loadAmoledEnabled() ?: true
         val liquidGlassEnabled = ThemeSettingsStorage.loadLiquidGlassNativeTabBarEnabled() ?: false
         _liquidGlassNativeTabBarEnabled.value = liquidGlassEnabled
         NativeTabBridge.publishLiquidGlassEnabled(liquidGlassEnabled)
@@ -94,7 +94,7 @@ object ThemeSettingsRepository {
         ThemeSettingsStorage.applySelectedAppLanguage(appLanguage.code)
         _selectedAppLanguage.value = appLanguage
         _navBarGlowEnabled.value = ThemeSettingsStorage.loadNavBarGlowEnabled() ?: true
-        _navBarStyle.value = NavBarStyle.fromKey(ThemeSettingsStorage.loadNavBarStyle())
+        _navBarStyle.value = NavBarStyle.EXPANDED
     }
 
     fun setTheme(theme: AppTheme) {

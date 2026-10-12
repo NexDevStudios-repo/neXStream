@@ -18,12 +18,12 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CheckCircleOutline
-import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.Shuffle
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.CheckCircleOutline
+import androidx.compose.material.icons.rounded.MoreHoriz
+import androidx.compose.material.icons.rounded.Shuffle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -108,9 +108,9 @@ fun DetailActionButtons(
                 modifier = Modifier
                     .weight(1f)
                     .height(buttonHeight),
-                shape = playShape,
-                color = if (playEnabled) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.surfaceVariant,
-                contentColor = if (playEnabled) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                shape = CircleShape,
+                color = if (playEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.4f),
+                contentColor = if (playEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
             ) {
                 Row(
                     modifier = Modifier
@@ -206,12 +206,12 @@ fun DetailActionButtons(
                     modifier = Modifier.size(iconButtonSize),
                     shape = CircleShape,
                     color = if (actionsExpanded) {
-                        MaterialTheme.colorScheme.onBackground
+                        MaterialTheme.colorScheme.primaryContainer
                     } else {
-                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.82f)
+                        MaterialTheme.colorScheme.surfaceContainerHigh
                     },
                     contentColor = if (actionsExpanded) {
-                        MaterialTheme.colorScheme.background
+                        MaterialTheme.colorScheme.onPrimaryContainer
                     } else {
                         MaterialTheme.colorScheme.onSurface
                     },
@@ -226,7 +226,7 @@ fun DetailActionButtons(
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
-                            imageVector = Icons.Default.MoreHoriz,
+                            imageVector = Icons.Rounded.MoreHoriz,
                             contentDescription = actionsMenuLabel,
                             modifier = Modifier
                                 .size(24.dp)
@@ -260,7 +260,7 @@ fun DetailActions(
     val shuffleAction = onShuffleClick?.let { onClick ->
         DetailSecondaryAction(
             label = stringResource(if (shuffleEnabled) Res.string.shuffle_stop else Res.string.random_episode_title),
-            icon = Icons.Default.Shuffle,
+            icon = Icons.Rounded.Shuffle,
             isActive = shuffleEnabled,
             onClick = onClick,
         )
@@ -274,7 +274,7 @@ fun DetailActions(
             add(
                 DetailSecondaryAction(
                     label = stringResource(if (isWatched) Res.string.hero_mark_unwatched else Res.string.hero_mark_watched),
-                    icon = if (isWatched) Icons.Default.CheckCircle else Icons.Default.CheckCircleOutline,
+                    icon = if (isWatched) Icons.Rounded.CheckCircle else Icons.Rounded.CheckCircleOutline,
                     isActive = isWatched,
                     onClick = onWatchedClick,
                 ),
@@ -282,7 +282,7 @@ fun DetailActions(
             add(
                 DetailSecondaryAction(
                     label = stringResource(if (isSaved) Res.string.hero_remove_from_library else Res.string.hero_add_to_library),
-                    icon = if (isSaved) Icons.Default.Check else Icons.Default.Add,
+                    icon = if (isSaved) Icons.Rounded.Check else Icons.Rounded.Add,
                     isActive = isSaved,
                     onClick = onSaveClick,
                     onLongClick = onSaveLongClick,
@@ -314,16 +314,15 @@ private fun DetailIconAction(
         },
         shape = CircleShape,
         color = if (active) {
-            MaterialTheme.colorScheme.onBackground
+            MaterialTheme.colorScheme.primaryContainer
         } else {
-            MaterialTheme.colorScheme.surfaceVariant
+            MaterialTheme.colorScheme.surfaceContainerHigh
         },
         contentColor = if (active) {
-            MaterialTheme.colorScheme.background
+            MaterialTheme.colorScheme.onPrimaryContainer
         } else {
             MaterialTheme.colorScheme.onSurface
         },
-        tonalElevation = 6.dp,
     ) {
         Box(
             modifier = Modifier

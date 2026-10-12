@@ -12,14 +12,7 @@ import com.nuvio.app.features.tracking.TrackingSettingsRepository
 import com.nuvio.app.features.library.LibraryRepository
 import com.nuvio.app.features.library.LibraryDisplaySettingsRepository
 import com.nuvio.app.features.watchprogress.WatchProgressRepository
-import com.nuvio.app.features.addons.AddonRepository
-import com.nuvio.app.features.plugins.PluginRepository
 import com.nuvio.app.features.settings.ThemeSettingsRepository
-import com.nuvio.app.core.ui.PosterCardStyleRepository
-import com.nuvio.app.core.ui.CardDepthStyleRepository
-import com.nuvio.app.features.player.PlayerSettingsRepository
-import com.nuvio.app.features.streams.StreamBadgeSettingsRepository
-import com.nuvio.app.features.p2p.P2pSettingsRepository
 import com.nuvio.app.features.home.HomeCatalogSettingsRepository
 import com.nuvio.app.features.home.HomeRepository
 import com.nuvio.app.features.details.MetaScreenSettingsRepository
@@ -97,7 +90,7 @@ object ProfileRepository {
                 userId = userId,
                 profileIndex = 1,
                 name = "neXStream",
-                avatarColorHex = "#2563EB",
+                avatarColorHex = DEFAULT_PROFILE_COLOR_HEX,
             )
             _state.value = ProfileState(
                 profiles = listOf(defaultProfile),
@@ -143,17 +136,14 @@ object ProfileRepository {
         LibraryRepository.onProfileChanged(profileIndex)
         LibraryDisplaySettingsRepository.onProfileChanged()
         WatchProgressRepository.onProfileChanged(profileIndex)
-        AddonRepository.onProfileChanged(profileIndex)
-        if (com.nuvio.app.core.build.AppFeaturePolicy.pluginsEnabled) {
-            PluginRepository.onProfileChanged(profileIndex)
-        }
         ThemeSettingsRepository.onProfileChanged()
-        PosterCardStyleRepository.onProfileChanged()
-        CardDepthStyleRepository.onProfileChanged()
-        PlayerSettingsRepository.onProfileChanged()
-        StreamBadgeSettingsRepository.onProfileChanged()
-        P2pSettingsRepository.onProfileChanged()
+        com.nuvio.app.core.ui.PosterCardStyleRepository.onProfileChanged()
+        com.nuvio.app.core.ui.CardDepthStyleRepository.onProfileChanged()
+        com.nuvio.app.features.player.PlayerSettingsRepository.onProfileChanged()
+        com.nuvio.app.features.streams.StreamBadgeSettingsRepository.onProfileChanged()
         HomeCatalogSettingsRepository.onProfileChanged()
+        val usesPrimary = selectedProfile?.usesPrimaryAddons ?: false
+        com.nuvio.app.features.xtream.XtreamRepository.onProfileChanged(profileIndex, usesPrimary)
         HomeRepository.clear()
         MetaScreenSettingsRepository.onProfileChanged()
         com.nuvio.app.features.shuffle.EpisodeShuffleRepository.onProfileChanged()
@@ -305,10 +295,16 @@ object ProfileRepository {
     private fun applyPayloadsLocally(payloads: List<ProfilePushPayload>) {
         val authState = AuthRepository.state.value as? AuthState.Authenticated
         val userId = authState?.userId ?: "local_user"
+        val existingByIndex = _state.value.profiles.associateBy { it.profileIndex }
         val profiles = payloads.map { p ->
+            val existing = existingByIndex[p.profileIndex]
             NuvioProfile(
-                id = "",
+                id = existing?.id.orEmpty(),
                 userId = userId,
+                pinEnabled = existing?.pinEnabled ?: false,
+                pinLockedUntil = existing?.pinLockedUntil,
+                createdAt = existing?.createdAt.orEmpty(),
+                updatedAt = existing?.updatedAt.orEmpty(),
                 profileIndex = p.profileIndex,
                 name = p.name,
                 avatarColorHex = p.avatarColorHex,
@@ -351,7 +347,10 @@ object ProfileRepository {
             hasEverSelectedProfile = stored.hasEverSelectedProfile,
             rememberLastProfileEnabled = stored.rememberLastProfileEnabled,
         )
-        _state.value.activeProfile?.let { activeProfileIndex = it.profileIndex }
+        _state.value.activeProfile?.let {
+            activeProfileIndex = it.profileIndex
+            com.nuvio.app.features.xtream.XtreamRepository.onProfileChanged(it.profileIndex, it.usesPrimaryAddons)
+        }
         syncPinCache(profiles)
     }
 

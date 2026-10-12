@@ -49,8 +49,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.nuvio.app.features.addons.AddonRepository
-import com.nuvio.app.features.addons.enabledAddons
 import com.nuvio.app.features.player.AndroidLibmpvVideoOutput
 import com.nuvio.app.features.player.AndroidPlaybackEngine
 import com.nuvio.app.features.player.AudioLanguageOption
@@ -71,15 +69,6 @@ import com.nuvio.app.features.player.formatPlaybackSpeedLabel
 import com.nuvio.app.features.player.languageLabelForCode
 import com.nuvio.app.features.player.subtitleFontSizeRangeSp
 import com.nuvio.app.features.player.toStorageHexString
-import com.nuvio.app.features.p2p.P2pConsentDialog
-import com.nuvio.app.features.p2p.P2pCacheClearResult
-import com.nuvio.app.features.p2p.P2pCacheSize
-import com.nuvio.app.features.p2p.P2pSettingsRepository
-import com.nuvio.app.features.p2p.P2pStreamingEngine
-import com.nuvio.app.features.p2p.P2pStreamingState
-import com.nuvio.app.features.p2p.P2pTorrentProfile
-import com.nuvio.app.features.plugins.PluginsUiState
-import com.nuvio.app.features.plugins.PluginRepository
 import com.nuvio.app.features.streams.StreamAutoPlayMode
 import com.nuvio.app.features.streams.StreamAutoPlaySource
 import com.nuvio.app.isIos
@@ -100,8 +89,8 @@ internal fun LazyListScope.playbackSettingsContent(
     secondaryPreferredAudioLanguage: String?,
     preferredSubtitleLanguage: String,
     secondaryPreferredSubtitleLanguage: String?,
-    streamReuseLastLinkEnabled: Boolean,
-    streamReuseLastLinkCacheHours: Int,
+    streamReuseLastLinkEnabled: Boolean = false,
+    streamReuseLastLinkCacheHours: Int = 0,
     androidPlaybackEngine: AndroidPlaybackEngine,
     androidLibmpvVideoOutput: AndroidLibmpvVideoOutput,
     androidLibmpvHardwareDecodingEnabled: Boolean,
@@ -146,30 +135,7 @@ private fun formatStep(value: Float): String {
     }
 }
 
-@Composable
-private fun p2pProfileLabel(profile: P2pTorrentProfile): String = when (profile) {
-    P2pTorrentProfile.SOFT -> stringResource(Res.string.settings_p2p_profile_soft)
-    P2pTorrentProfile.BALANCED -> stringResource(Res.string.settings_p2p_profile_balanced)
-    P2pTorrentProfile.FAST -> stringResource(Res.string.settings_p2p_profile_fast)
-}
 
-@Composable
-private fun p2pCacheSizeLabel(size: P2pCacheSize): String = when (size) {
-    P2pCacheSize.NONE -> stringResource(Res.string.settings_p2p_cache_none)
-    P2pCacheSize.GB_2 -> stringResource(Res.string.settings_p2p_cache_2_gb)
-    P2pCacheSize.GB_5 -> stringResource(Res.string.settings_p2p_cache_5_gb)
-    P2pCacheSize.GB_10 -> stringResource(Res.string.settings_p2p_cache_10_gb)
-}
-
-private fun formatP2pCacheBytes(bytes: Long): String {
-    val gibibyte = 1024.0 * 1024.0 * 1024.0
-    val mebibyte = 1024.0 * 1024.0
-    return if (bytes >= gibibyte) {
-        "${kotlin.math.round(bytes / gibibyte * 10.0) / 10.0} GB"
-    } else {
-        "${kotlin.math.round(bytes / mebibyte * 10.0) / 10.0} MB"
-    }
-}
 
 fun snapToStep(value: Float, step: Float): Float {
     return (value / step).roundToInt() * step
@@ -276,8 +242,8 @@ private fun PlaybackSettingsSection(
     secondaryPreferredAudioLanguage: String?,
     preferredSubtitleLanguage: String,
     secondaryPreferredSubtitleLanguage: String?,
-    streamReuseLastLinkEnabled: Boolean,
-    streamReuseLastLinkCacheHours: Int,
+    streamReuseLastLinkEnabled: Boolean = false,
+    streamReuseLastLinkCacheHours: Int = 0,
     androidPlaybackEngine: AndroidPlaybackEngine,
     androidLibmpvVideoOutput: AndroidLibmpvVideoOutput,
     androidLibmpvHardwareDecodingEnabled: Boolean,
@@ -298,7 +264,6 @@ private fun PlaybackSettingsSection(
     var showSubtitleOutlineColorDialog by remember { mutableStateOf(false) }
     var showExternalPlayerDialog by remember { mutableStateOf(false) }
     var showExternalPlayerAppDialog by remember { mutableStateOf(false) }
-    var showReuseCacheDurationDialog by remember { mutableStateOf(false) }
     var showPlaybackEngineDialog by remember { mutableStateOf(false) }
     var showLibmpvVideoOutputDialog by remember { mutableStateOf(false) }
     var showDecoderPriorityDialog by remember { mutableStateOf(false) }
@@ -308,35 +273,11 @@ private fun PlaybackSettingsSection(
     var showIosTargetPrimariesDialog by remember { mutableStateOf(false) }
     var showIosTargetTransferDialog by remember { mutableStateOf(false) }
     var showLibassRenderTypeDialog by remember { mutableStateOf(false) }
-    var showAutoPlayModeDialog by remember { mutableStateOf(false) }
-    var showAutoPlaySourceDialog by remember { mutableStateOf(false) }
-    var showAutoPlayAddonSelectionDialog by remember { mutableStateOf(false) }
-    var showAutoPlayPluginSelectionDialog by remember { mutableStateOf(false) }
-    var showAutoPlayRegexDialog by remember { mutableStateOf(false) }
-    var showP2pConsentDialog by remember { mutableStateOf(false) }
-    var showP2pProfileDialog by remember { mutableStateOf(false) }
-    var showP2pCacheSizeDialog by remember { mutableStateOf(false) }
-    var p2pCacheClearResult by remember { mutableStateOf<P2pCacheClearResult?>(null) }
-    var p2pCacheClearFailed by remember { mutableStateOf(false) }
-    val pluginsEnabled = AppFeaturePolicy.pluginsEnabled
     val autoPlayPlayerSettings by PlayerSettingsRepository.uiState.collectAsStateWithLifecycle()
-    val p2pSettings by remember {
-        P2pSettingsRepository.ensureLoaded()
-        P2pSettingsRepository.uiState
-    }.collectAsStateWithLifecycle()
-    val p2pCacheState by P2pStreamingEngine.cacheState.collectAsStateWithLifecycle()
-    val p2pStreamingState by P2pStreamingEngine.state.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
     val availableExternalPlayers = ExternalPlayerPlatform.availablePlayers()
     val selectedExternalPlayer = availableExternalPlayers.firstOrNull {
         it.id == autoPlayPlayerSettings.externalPlayerId
-    }
-    val addonUiState by AddonRepository.uiState.collectAsStateWithLifecycle()
-    val pluginUiState = if (pluginsEnabled) {
-        val state by PluginRepository.uiState.collectAsStateWithLifecycle()
-        state
-    } else {
-        PluginsUiState(pluginsEnabled = false)
     }
     val hapticFeedback = LocalHapticFeedback.current
     val sectionSpacing = if (isTablet) 18.dp else 12.dp
@@ -666,234 +607,6 @@ private fun PlaybackSettingsSection(
             }
         }
 
-        if (P2pSettingsRepository.isVisible) {
-            SettingsSection(
-                title = stringResource(Res.string.settings_playback_section_p2p),
-                isTablet = isTablet,
-            ) {
-                SettingsGroup(isTablet = isTablet) {
-                    SettingsSwitchRow(
-                        title = stringResource(Res.string.settings_p2p_title),
-                        description = stringResource(Res.string.settings_p2p_subtitle),
-                        checked = p2pSettings.p2pEnabled,
-                        isTablet = isTablet,
-                        onCheckedChange = { enabled ->
-                            if (enabled && !p2pSettings.p2pEnabled) {
-                                showP2pConsentDialog = true
-                            } else {
-                                P2pSettingsRepository.setP2pEnabled(enabled)
-                            }
-                        },
-                    )
-                    SettingsGroupDivider(isTablet = isTablet)
-                    SettingsSwitchRow(
-                        title = stringResource(Res.string.settings_p2p_hide_stats_title),
-                        description = stringResource(Res.string.settings_p2p_hide_stats_subtitle),
-                        checked = p2pSettings.hideTorrentStats,
-                        isTablet = isTablet,
-                        onCheckedChange = P2pSettingsRepository::setHideTorrentStats,
-                    )
-                    SettingsGroupDivider(isTablet = isTablet)
-                    SettingsNavigationRow(
-                        title = stringResource(Res.string.settings_p2p_profile_title),
-                        description = p2pProfileLabel(p2pSettings.torrentProfile),
-                        isTablet = isTablet,
-                        onClick = { showP2pProfileDialog = true },
-                    )
-                    SettingsGroupDivider(isTablet = isTablet)
-                    SettingsNavigationRow(
-                        title = stringResource(Res.string.settings_p2p_cache_size_title),
-                        description = p2pCacheSizeLabel(p2pSettings.cacheSize),
-                        isTablet = isTablet,
-                        onClick = { showP2pCacheSizeDialog = true },
-                    )
-                    SettingsGroupDivider(isTablet = isTablet)
-                    val cacheClearAvailable = p2pStreamingState !is P2pStreamingState.Connecting &&
-                        p2pStreamingState !is P2pStreamingState.Streaming &&
-                        !p2pCacheState.isClearing
-                    SettingsNavigationRow(
-                        title = stringResource(Res.string.settings_p2p_clear_cache_title),
-                        description = when {
-                            p2pCacheState.isClearing ->
-                                stringResource(Res.string.settings_p2p_clear_cache_clearing)
-                            !cacheClearAvailable ->
-                                stringResource(Res.string.settings_p2p_clear_cache_playback_active)
-                            p2pCacheClearFailed ->
-                                stringResource(Res.string.settings_p2p_clear_cache_failed)
-                            p2pCacheClearResult != null -> stringResource(
-                                Res.string.settings_p2p_clear_cache_done,
-                                formatP2pCacheBytes(p2pCacheClearResult!!.reclaimedBytes),
-                            )
-                            !p2pCacheState.hasMeasurement ->
-                                stringResource(Res.string.settings_p2p_clear_cache_usage_pending)
-                            else -> stringResource(
-                                Res.string.settings_p2p_clear_cache_usage,
-                                formatP2pCacheBytes(p2pCacheState.usedBytes),
-                            )
-                        },
-                        enabled = cacheClearAvailable,
-                        isTablet = isTablet,
-                        onClick = {
-                            p2pCacheClearResult = null
-                            p2pCacheClearFailed = false
-                            coroutineScope.launch {
-                                runCatching { P2pStreamingEngine.clearCache() }
-                                    .onSuccess { p2pCacheClearResult = it }
-                                    .onFailure { p2pCacheClearFailed = true }
-                            }
-                        },
-                    )
-                }
-            }
-        }
-
-        SettingsSection(
-            title = stringResource(Res.string.settings_playback_section_stream_selection),
-            isTablet = isTablet,
-        ) {
-            SettingsGroup(isTablet = isTablet) {
-                SettingsSwitchRow(
-                    title = stringResource(Res.string.settings_playback_reuse_last_link),
-                    description = stringResource(Res.string.settings_playback_reuse_last_link_description),
-                    checked = streamReuseLastLinkEnabled,
-                    isTablet = isTablet,
-                    onCheckedChange = PlayerSettingsRepository::setStreamReuseLastLinkEnabled,
-                )
-                if (streamReuseLastLinkEnabled) {
-                    SettingsGroupDivider(isTablet = isTablet)
-                    SettingsNavigationRow(
-                        title = stringResource(Res.string.settings_playback_last_link_cache_duration),
-                        description = formatReuseCacheDuration(streamReuseLastLinkCacheHours),
-                        isTablet = isTablet,
-                        onClick = { showReuseCacheDurationDialog = true },
-                    )
-                }
-            }
-        }
-
-        SettingsSection(
-            title = stringResource(Res.string.settings_playback_section_stream_auto_play),
-            isTablet = isTablet,
-        ) {
-            SettingsGroup(isTablet = isTablet) {
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.settings_playback_stream_selection_mode),
-                    description = stringResource(autoPlayPlayerSettings.streamAutoPlayMode.labelRes),
-                    isTablet = isTablet,
-                    onClick = { showAutoPlayModeDialog = true },
-                )
-                if (autoPlayPlayerSettings.streamAutoPlayMode == StreamAutoPlayMode.REGEX_MATCH) {
-                    SettingsGroupDivider(isTablet = isTablet)
-                    val notSetLabel = stringResource(Res.string.settings_playback_not_set)
-                    SettingsNavigationRow(
-                        title = stringResource(Res.string.settings_playback_regex_pattern),
-                        description = autoPlayPlayerSettings.streamAutoPlayRegex.ifBlank { notSetLabel },
-                        isTablet = isTablet,
-                        onClick = { showAutoPlayRegexDialog = true },
-                    )
-                }
-                SettingsGroupDivider(isTablet = isTablet)
-                val timeoutSec = autoPlayPlayerSettings.streamAutoPlayTimeoutSeconds
-                val timeoutLabel = when (timeoutSec) {
-                    0 -> stringResource(Res.string.settings_playback_timeout_instant)
-                    Int.MAX_VALUE -> stringResource(Res.string.settings_playback_timeout_unlimited)
-                    else -> stringResource(Res.string.settings_playback_timeout_seconds, timeoutSec)
-                }
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = if (isTablet) 18.dp else 16.dp, vertical = 10.dp),
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
-                            Text(
-                                text = stringResource(Res.string.settings_playback_stream_timeout),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                            Text(
-                                text = stringResource(Res.string.settings_playback_stream_timeout_description),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        ValueBox(text = timeoutLabel, modifier = Modifier.wrapContentWidth())
-                    }
-                    val timeoutIndex = STREAM_AUTO_PLAY_TIMEOUT_VALUES.indexOf(timeoutSec)
-                        .coerceAtLeast(0)
-                    val maxIndex = (STREAM_AUTO_PLAY_TIMEOUT_VALUES.size - 1).toFloat()
-                    var sliderValue by remember(timeoutIndex) { mutableFloatStateOf(timeoutIndex.toFloat()) }
-                    var lastHapticStep by remember(timeoutIndex) { mutableStateOf(timeoutIndex.toFloat()) }
-                    Slider(
-                        value = sliderValue,
-                        onValueChange = {
-                            val snapped = snapToStep(it, 1f)
-                            sliderValue = snapped
-
-                            if (snapped != lastHapticStep) {
-                                lastHapticStep = snapped
-                                hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            }
-                        },
-                        onValueChangeFinished = {
-                            val index = sliderValue.toInt().coerceIn(0, STREAM_AUTO_PLAY_TIMEOUT_VALUES.size - 1)
-                            PlayerSettingsRepository.setStreamAutoPlayTimeoutSeconds(STREAM_AUTO_PLAY_TIMEOUT_VALUES[index])
-                        },
-                        valueRange = 0f..maxIndex,
-                        steps = calculateSteps(0f, maxIndex, 1f),
-                        colors = SliderDefaults.colors(
-                            thumbColor = MaterialTheme.colorScheme.primary,
-                            activeTrackColor = MaterialTheme.colorScheme.primary,
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-                SettingsGroupDivider(isTablet = isTablet)
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.settings_playback_source_scope),
-                    description = stringResource(autoPlayPlayerSettings.streamAutoPlaySource.labelRes(pluginsEnabled)),
-                    isTablet = isTablet,
-                    onClick = { showAutoPlaySourceDialog = true },
-                )
-                if (autoPlayPlayerSettings.streamAutoPlaySource != StreamAutoPlaySource.ENABLED_PLUGINS_ONLY) {
-                    SettingsGroupDivider(isTablet = isTablet)
-                    val addonSubtitle = if (autoPlayPlayerSettings.streamAutoPlaySelectedAddons.isEmpty()) {
-                        stringResource(Res.string.settings_playback_all_addons)
-                    } else {
-                        stringResource(
-                            Res.string.settings_playback_selected_count,
-                            autoPlayPlayerSettings.streamAutoPlaySelectedAddons.size,
-                        )
-                    }
-                    SettingsNavigationRow(
-                        title = stringResource(Res.string.settings_playback_allowed_addons),
-                        description = addonSubtitle,
-                        isTablet = isTablet,
-                        onClick = { showAutoPlayAddonSelectionDialog = true },
-                    )
-                }
-                if (pluginsEnabled && autoPlayPlayerSettings.streamAutoPlaySource != StreamAutoPlaySource.INSTALLED_ADDONS_ONLY) {
-                    SettingsGroupDivider(isTablet = isTablet)
-                    val pluginSubtitle = if (autoPlayPlayerSettings.streamAutoPlaySelectedPlugins.isEmpty()) {
-                        stringResource(Res.string.settings_playback_all_plugins)
-                    } else {
-                        stringResource(
-                            Res.string.settings_playback_selected_count,
-                            autoPlayPlayerSettings.streamAutoPlaySelectedPlugins.size,
-                        )
-                    }
-                    SettingsNavigationRow(
-                        title = stringResource(Res.string.settings_playback_allowed_plugins),
-                        description = pluginSubtitle,
-                        isTablet = isTablet,
-                        onClick = { showAutoPlayPluginSelectionDialog = true },
-                    )
-                }
-            }
-        }
 
         if (!isIos) {
             val decoderEnabled = !autoPlayPlayerSettings.externalPlayerEnabled
@@ -1320,44 +1033,7 @@ private fun PlaybackSettingsSection(
         )
     }
 
-    if (showP2pProfileDialog) {
-        IosEnumSelectionDialog(
-            title = stringResource(Res.string.settings_p2p_profile_title),
-            options = P2pTorrentProfile.entries,
-            selected = p2pSettings.torrentProfile,
-            label = { p2pProfileLabel(it) },
-            description = { profile ->
-                when (profile) {
-                    P2pTorrentProfile.SOFT ->
-                        stringResource(Res.string.settings_p2p_profile_soft_description)
-                    P2pTorrentProfile.BALANCED ->
-                        stringResource(Res.string.settings_p2p_profile_balanced_description)
-                    P2pTorrentProfile.FAST ->
-                        stringResource(Res.string.settings_p2p_profile_fast_description)
-                }
-            },
-            onSelect = { profile ->
-                P2pSettingsRepository.setTorrentProfile(profile)
-                showP2pProfileDialog = false
-            },
-            onDismiss = { showP2pProfileDialog = false },
-        )
-    }
 
-    if (showP2pCacheSizeDialog) {
-        IosEnumSelectionDialog(
-            title = stringResource(Res.string.settings_p2p_cache_size_title),
-            options = P2pCacheSize.entries,
-            selected = p2pSettings.cacheSize,
-            label = { p2pCacheSizeLabel(it) },
-            onSelect = { size ->
-                P2pSettingsRepository.setCacheSize(size)
-                p2pCacheClearResult = null
-                showP2pCacheSizeDialog = false
-            },
-            onDismiss = { showP2pCacheSizeDialog = false },
-        )
-    }
 
     if (showSecondaryAudioDialog) {
         val originalHint = stringResource(Res.string.settings_playback_option_original_hint)
@@ -1454,17 +1130,6 @@ private fun PlaybackSettingsSection(
         )
     }
 
-    if (showReuseCacheDurationDialog) {
-        ReuseCacheDurationDialog(
-            selectedHours = streamReuseLastLinkCacheHours,
-            onDurationSelected = { hours ->
-                PlayerSettingsRepository.setStreamReuseLastLinkCacheHours(hours)
-                showReuseCacheDurationDialog = false
-            },
-            onDismiss = { showReuseCacheDurationDialog = false },
-        )
-    }
-
     if (showExternalPlayerDialog) {
         PlayerPreferenceDialog(
             isExternal = autoPlayPlayerSettings.externalPlayerEnabled,
@@ -1488,15 +1153,7 @@ private fun PlaybackSettingsSection(
         )
     }
 
-    if (showP2pConsentDialog) {
-        P2pConsentDialog(
-            onEnableP2p = {
-                P2pSettingsRepository.setP2pEnabled(true)
-                showP2pConsentDialog = false
-            },
-            onDismiss = { showP2pConsentDialog = false },
-        )
-    }
+
 
     if (showDecoderPriorityDialog) {
         DecoderPriorityDialog(
@@ -1619,92 +1276,6 @@ private fun PlaybackSettingsSection(
             onDismiss = { showLibassRenderTypeDialog = false },
         )
     }
-
-    if (showAutoPlayModeDialog) {
-        StreamAutoPlayModeDialog(
-            selectedMode = autoPlayPlayerSettings.streamAutoPlayMode,
-            onModeSelected = {
-                PlayerSettingsRepository.setStreamAutoPlayMode(it)
-                showAutoPlayModeDialog = false
-            },
-            onDismiss = { showAutoPlayModeDialog = false },
-        )
-    }
-
-    if (showAutoPlaySourceDialog) {
-        StreamAutoPlaySourceDialog(
-            pluginsEnabled = pluginsEnabled,
-            selectedSource = autoPlayPlayerSettings.streamAutoPlaySource,
-            onSourceSelected = {
-                PlayerSettingsRepository.setStreamAutoPlaySource(it)
-                showAutoPlaySourceDialog = false
-            },
-            onDismiss = { showAutoPlaySourceDialog = false },
-        )
-    }
-
-    if (showAutoPlayAddonSelectionDialog) {
-        val addonNames = addonUiState.addons
-            .enabledAddons()
-            .mapNotNull { it.manifest }
-            .filter { manifest -> manifest.resources.any { resource -> resource.name == "stream" } }
-            .map { it.name }
-            .distinct()
-            .sorted()
-        StreamAutoPlayProviderSelectionDialog(
-            title = stringResource(Res.string.settings_playback_allowed_addons),
-            allLabel = stringResource(Res.string.settings_playback_all_addons),
-            items = addonNames,
-            selectedItems = autoPlayPlayerSettings.streamAutoPlaySelectedAddons,
-            onSelectionSaved = {
-                PlayerSettingsRepository.setStreamAutoPlaySelectedAddons(it)
-                showAutoPlayAddonSelectionDialog = false
-            },
-            onDismiss = { showAutoPlayAddonSelectionDialog = false },
-        )
-    }
-
-    if (pluginsEnabled && showAutoPlayPluginSelectionDialog) {
-        val pluginNames = pluginUiState.scrapers
-            .filter { it.enabled }
-            .map { it.name }
-            .distinct()
-            .sorted()
-        StreamAutoPlayProviderSelectionDialog(
-            title = stringResource(Res.string.settings_playback_allowed_plugins),
-            allLabel = stringResource(Res.string.settings_playback_all_plugins),
-            items = pluginNames,
-            selectedItems = autoPlayPlayerSettings.streamAutoPlaySelectedPlugins,
-            onSelectionSaved = {
-                PlayerSettingsRepository.setStreamAutoPlaySelectedPlugins(it)
-                showAutoPlayPluginSelectionDialog = false
-            },
-            onDismiss = { showAutoPlayPluginSelectionDialog = false },
-        )
-    }
-
-    if (showAutoPlayRegexDialog) {
-        StreamAutoPlayRegexDialog(
-            initialRegex = autoPlayPlayerSettings.streamAutoPlayRegex,
-            onSave = {
-                PlayerSettingsRepository.setStreamAutoPlayRegex(it)
-                showAutoPlayRegexDialog = false
-            },
-            onDismiss = { showAutoPlayRegexDialog = false },
-        )
-    }
-}
-
-@Composable
-private fun formatReuseCacheDuration(hours: Int): String = when {
-    hours < 24 && hours == 1 -> stringResource(Res.string.settings_playback_duration_hour_one, hours)
-    hours < 24 -> stringResource(Res.string.settings_playback_duration_hours, hours)
-    hours % 24 == 0 -> {
-        val days = hours / 24
-        if (days == 1) stringResource(Res.string.settings_playback_duration_day_one, days)
-        else stringResource(Res.string.settings_playback_duration_days, days)
-    }
-    else -> stringResource(Res.string.settings_playback_duration_hours, hours)
 }
 
 private data class LanguageSelectionOption(
@@ -1841,41 +1412,7 @@ private fun LanguageSelectionDialog(
     }
 }
 
-@Composable
-@OptIn(ExperimentalMaterial3Api::class)
-private fun ReuseCacheDurationDialog(
-    selectedHours: Int,
-    onDurationSelected: (Int) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val options = listOf(1, 2, 3, 6, 12, 24, 48, 72, 168)
 
-    DialogSurface(
-        onDismissRequest = onDismiss,
-        title = stringResource(Res.string.settings_playback_last_link_cache_duration),
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            options.forEach { hours ->
-                val isSelected = hours == selectedHours
-                DialogOption(
-                    text = formatReuseCacheDuration(hours),
-                    selected = isSelected,
-                    onClick = { onDurationSelected(hours) },
-                )
-            }
-        }
-
-        DialogButtons {
-            DialogButton(
-                text = stringResource(Res.string.action_done),
-                onClick = onDismiss,
-            )
-        }
-    }
-}
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -2174,140 +1711,6 @@ private fun StreamAutoPlayModeDialog(
     }
 }
 
-@Composable
-@OptIn(ExperimentalMaterial3Api::class)
-private fun StreamAutoPlaySourceDialog(
-    pluginsEnabled: Boolean,
-    selectedSource: StreamAutoPlaySource,
-    onSourceSelected: (StreamAutoPlaySource) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val options = buildList {
-        add(
-            Triple(
-                StreamAutoPlaySource.ALL_SOURCES,
-                if (pluginsEnabled) {
-                    Res.string.settings_playback_source_scope_all_sources
-                } else {
-                    Res.string.settings_playback_source_scope_all_addons
-                },
-                if (pluginsEnabled) {
-                    Res.string.settings_playback_source_scope_all_sources_description
-                } else {
-                    Res.string.settings_playback_source_scope_all_addons_description
-                },
-            ),
-        )
-        add(
-            Triple(
-                StreamAutoPlaySource.INSTALLED_ADDONS_ONLY,
-                Res.string.settings_playback_source_scope_installed_addons_only,
-                Res.string.settings_playback_source_scope_installed_addons_only_description,
-            ),
-        )
-        if (pluginsEnabled) {
-            add(
-                Triple(
-                    StreamAutoPlaySource.ENABLED_PLUGINS_ONLY,
-                    Res.string.settings_playback_source_scope_enabled_plugins_only,
-                    Res.string.settings_playback_source_scope_enabled_plugins_only_description,
-                ),
-            )
-        }
-    }
-
-    DialogSurface(
-        onDismissRequest = onDismiss,
-        title = stringResource(Res.string.settings_playback_source_scope),
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            options.forEach { (source, titleRes, descriptionRes) ->
-                val isSelected = source == selectedSource
-                DialogOption(
-                    text = stringResource(titleRes),
-                    description = stringResource(descriptionRes),
-                    selected = isSelected,
-                    onClick = { onSourceSelected(source) },
-                )
-            }
-        }
-
-        DialogButtons {
-            DialogButton(
-                text = stringResource(Res.string.action_done),
-                onClick = onDismiss,
-            )
-        }
-    }
-}
-
-@Composable
-@OptIn(ExperimentalMaterial3Api::class)
-private fun StreamAutoPlayProviderSelectionDialog(
-    title: String,
-    allLabel: String,
-    items: List<String>,
-    selectedItems: Set<String>,
-    onSelectionSaved: (Set<String>) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    var selected by remember(selectedItems, items) {
-        mutableStateOf(selectedItems.intersect(items.toSet()))
-    }
-
-    DialogSurface(
-        onDismissRequest = {
-            onSelectionSaved(selected)
-            onDismiss()
-        },
-        title = title,
-    ) {
-        DialogOption(
-            text = allLabel,
-            selected = selected.isEmpty(),
-            onClick = { selected = emptySet() },
-        )
-
-        if (items.isEmpty()) {
-            Text(
-                text = stringResource(Res.string.settings_playback_no_items_available),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 340.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                items(
-                    count = items.size,
-                    key = { items[it] },
-                ) { index ->
-                    val item = items[index]
-                    val isSelected = item in selected
-                    DialogOption(
-                        text = item,
-                        selected = isSelected,
-                        onClick = {
-                            selected = if (isSelected) selected - item else selected + item
-                        },
-                    )
-                }
-            }
-        }
-
-        Text(
-            text = stringResource(Res.string.settings_playback_dialog_save_close),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -2624,14 +2027,6 @@ private fun decoderPriorityRes(priority: Int): StringResource = when (priority) 
 
 @Composable
 private fun decoderPriorityLabel(priority: Int): String = stringResource(decoderPriorityRes(priority))
-
-private fun StreamAutoPlaySource.labelRes(pluginsEnabled: Boolean): StringResource = when (this) {
-    StreamAutoPlaySource.ALL_SOURCES ->
-        if (pluginsEnabled) Res.string.settings_playback_source_scope_all_sources
-        else Res.string.settings_playback_source_scope_all_addons
-    StreamAutoPlaySource.INSTALLED_ADDONS_ONLY -> Res.string.settings_playback_source_scope_installed_addons_only
-    StreamAutoPlaySource.ENABLED_PLUGINS_ONLY -> Res.string.settings_playback_source_scope_enabled_plugins_only
-}
 
 private val StreamAutoPlayMode.labelRes: StringResource
     get() = when (this) {

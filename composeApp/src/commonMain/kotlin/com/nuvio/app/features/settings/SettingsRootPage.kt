@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.Dns
@@ -14,6 +14,7 @@ import androidx.compose.material.icons.rounded.Extension
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Link
+import androidx.compose.material.icons.rounded.LiveTv
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.People
@@ -73,10 +74,9 @@ internal fun LazyListScope.settingsRootContent(
     onAppearanceClick: () -> Unit,
     onAdvancedClick: () -> Unit,
     onNotificationsClick: () -> Unit,
-    onContentDiscoveryClick: () -> Unit,
     onXtreamSourcesClick: () -> Unit = {},
     onIntegrationsClick: () -> Unit,
-    onTrackingClick: () -> Unit,
+    onTrackingClick: () -> Unit = {},
     onSupportersContributorsClick: () -> Unit,
     onLicensesAttributionsClick: () -> Unit,
     onCheckForUpdatesClick: (() -> Unit)? = null,
@@ -113,14 +113,6 @@ internal fun LazyListScope.settingsRootContent(
                         isTablet = isTablet,
                         onClick = onAccountClick,
                     )
-                    SettingsGroupDivider(isTablet = isTablet)
-                    SettingsNavigationRow(
-                        title = stringResource(Res.string.compose_settings_page_tracking),
-                        description = stringResource(Res.string.compose_settings_root_tracking_description),
-                        icon = Icons.Default.Sync,
-                        isTablet = isTablet,
-                        onClick = onTrackingClick,
-                    )
                 }
             }
         }
@@ -141,16 +133,8 @@ internal fun LazyListScope.settingsRootContent(
                     )
                     SettingsGroupDivider(isTablet = isTablet)
                     SettingsNavigationRow(
-                        title = stringResource(Res.string.compose_settings_page_content_discovery),
-                        description = stringResource(Res.string.compose_settings_root_content_discovery_description),
-                        icon = Icons.Rounded.Extension,
-                        isTablet = isTablet,
-                        onClick = onContentDiscoveryClick,
-                    )
-                    SettingsGroupDivider(isTablet = isTablet)
-                    SettingsNavigationRow(
-                        title = "Fuente de Contenido",
-                        description = "Plugins Stremio y Servidores Xtream Codes IPTV",
+                        title = "Servidores IPTV",
+                        description = "Administrar cuentas de Xtream Codes",
                         icon = Icons.Rounded.Dns,
                         isTablet = isTablet,
                         onClick = onXtreamSourcesClick,
@@ -165,9 +149,9 @@ internal fun LazyListScope.settingsRootContent(
                     )
                     SettingsGroupDivider(isTablet = isTablet)
                     SettingsNavigationRow(
-                        title = stringResource(Res.string.compose_settings_page_integrations),
-                        description = stringResource(Res.string.compose_settings_root_integrations_description),
-                        icon = Icons.Rounded.Link,
+                        title = "Configuración IPTV / Xtream",
+                        description = "Formato de stream, User-Agent, búfer, EPG y sincronización",
+                        icon = Icons.Rounded.LiveTv,
                         isTablet = isTablet,
                         onClick = onIntegrationsClick,
                     )

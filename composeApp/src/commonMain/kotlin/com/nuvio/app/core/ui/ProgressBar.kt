@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,25 +18,28 @@ fun NuvioProgressBar(
     progress: Float,
     modifier: Modifier = Modifier,
     height: Dp = NuvioTokens.Space.s4,
-    trackColor: Color = MaterialTheme.nuvio.colors.playerTimelineTrack,
-    fillColor: Color = MaterialTheme.nuvio.colors.playerTimelineFill,
+    trackColor: Color = Color.Unspecified,
+    fillColor: Color = Color.Unspecified,
 ) {
-    val tokens = MaterialTheme.nuvio
+    val resolvedTrack = if (trackColor != Color.Unspecified) trackColor else MaterialTheme.colorScheme.surfaceContainerHighest
+    val resolvedFill = if (fillColor != Color.Unspecified) fillColor else MaterialTheme.colorScheme.primary
     val clampedProgress = progress.coerceIn(0f, 1f)
+
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
-            .clip(tokens.shapes.chip)
-            .background(trackColor),
+            .clip(CircleShape)
+            .background(resolvedTrack),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth(clampedProgress)
                 .width(NuvioTokens.Space.none)
                 .height(height)
-                .clip(tokens.shapes.chip)
-                .background(fillColor),
+                .clip(CircleShape)
+                .background(resolvedFill),
         )
     }
 }
+

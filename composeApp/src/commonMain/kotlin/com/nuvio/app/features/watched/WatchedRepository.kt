@@ -176,6 +176,12 @@ object WatchedRepository {
         loadFromDisk(profileId)
     }
 
+    fun clearAllWatched() {
+        val profileId = currentProfileId
+        WatchedStorage.savePayload(profileId, "")
+        loadFromDisk(profileId)
+    }
+
     fun clearLocalState() {
         val previousAccountJob = synchronized(accountScopeLock) {
             accountScopeJob.also {

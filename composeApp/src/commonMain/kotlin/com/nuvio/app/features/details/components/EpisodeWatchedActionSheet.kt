@@ -5,10 +5,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.DoneAll
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.PlaylistAddCheckCircle
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.DoneAll
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.PlaylistAddCheckCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -68,7 +68,7 @@ fun EpisodeWatchedActionSheet(
             )
             NuvioBottomSheetDivider()
             NuvioBottomSheetActionRow(
-                icon = Icons.Default.CheckCircle,
+                icon = Icons.Rounded.CheckCircle,
                 title = if (isEpisodeWatched) {
                     stringResource(Res.string.episode_mark_unwatched)
                 } else {
@@ -83,7 +83,7 @@ fun EpisodeWatchedActionSheet(
             )
             if (canMarkPreviousEpisodes) {
                 NuvioBottomSheetActionRow(
-                    icon = Icons.Default.DoneAll,
+                    icon = Icons.Rounded.DoneAll,
                     title = if (arePreviousEpisodesWatched) {
                         stringResource(Res.string.episode_mark_previous_unwatched)
                     } else {
@@ -98,7 +98,7 @@ fun EpisodeWatchedActionSheet(
                 )
             }
             NuvioBottomSheetActionRow(
-                icon = Icons.Default.PlaylistAddCheckCircle,
+                icon = Icons.Rounded.PlaylistAddCheckCircle,
                 title = if (isSeasonWatched) {
                     stringResource(Res.string.episode_mark_season_unwatched, seasonLabel)
                 } else {
@@ -113,7 +113,7 @@ fun EpisodeWatchedActionSheet(
             )
             if (showPlayManually && onPlayManually != null) {
                 NuvioBottomSheetActionRow(
-                    icon = Icons.Default.PlayArrow,
+                    icon = Icons.Rounded.PlayArrow,
                     title = stringResource(Res.string.play_manually),
                     onClick = {
                         onPlayManually()
@@ -164,7 +164,7 @@ fun SeasonWatchedActionSheet(
             )
             NuvioBottomSheetDivider()
             NuvioBottomSheetActionRow(
-                icon = Icons.Default.PlaylistAddCheckCircle,
+                icon = Icons.Rounded.PlaylistAddCheckCircle,
                 title = if (isSeasonWatched) {
                     stringResource(Res.string.episode_mark_season_unwatched, seasonLabel)
                 } else {
@@ -179,7 +179,7 @@ fun SeasonWatchedActionSheet(
             )
             if (canMarkPreviousSeasons) {
                 NuvioBottomSheetActionRow(
-                    icon = Icons.Default.DoneAll,
+                    icon = Icons.Rounded.DoneAll,
                     title = stringResource(Res.string.episode_mark_previous_seasons_watched),
                     onClick = {
                         onMarkPreviousSeasonsWatched()

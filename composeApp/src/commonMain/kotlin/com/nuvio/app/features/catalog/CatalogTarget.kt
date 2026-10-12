@@ -7,11 +7,9 @@ sealed interface CatalogTarget {
     val contentType: String
     val supportsPagination: Boolean
 
-    data class Addon(
-        val manifestUrl: String,
+    data class XtreamCategory(
         override val contentType: String,
-        val catalogId: String,
-        val genre: String? = null,
+        val categoryId: String,
         override val supportsPagination: Boolean = false,
     ) : CatalogTarget
 
@@ -34,7 +32,7 @@ sealed interface CatalogTarget {
 
 @Serializable
 enum class CatalogTargetKind {
-    ADDON,
+    XTREAM_CATEGORY,
     LIBRARY,
     COLLECTION_SOURCE,
 }
