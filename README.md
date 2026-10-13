@@ -5,7 +5,7 @@
   </a>
 
   <p>
-    Un reproductor IPTV moderno, fluido y de alto rendimiento para Android y Android TV.
+    Un reproductor IPTV moderno, fluido y de alto rendimiento para dispositivos móviles Android.
     <br />
     Construido con Kotlin Multiplatform y Jetpack Compose (Material You).
   </p>
@@ -23,7 +23,7 @@
 **neXStream** nació como un fork de **Nuvio Mobile**, un reproductor multimedia de código abierto con una arquitectura excepcional.
 
 ### ¿Por qué elegimos la base de Nuvio?
-* **Arquitectura de Interfaz de Primer Nivel:** Nuvio contaba con uno de los sistemas de UI más modernos del ecosistema Kotlin Multiplatform, utilizando Jetpack Compose con tokens de Material You, animaciones fluidas y un diseño adaptativo pensado tanto para pantallas táctiles como para control remoto en Android TV (D-pad).
+* **Arquitectura de Interfaz de Primer Nivel:** Nuvio contaba con uno de los sistemas de UI más modernos del ecosistema Kotlin Multiplatform, utilizando Jetpack Compose con tokens de Material You, animaciones fluidas y un diseño táctil adaptativo optimizado para dispositivos móviles.
 * **Motor de Reproducción Robusto:** Un pipeline multimedia maduro basado en ExoPlayer, con aceleración por hardware, soporte de subtítulos avanzados, cambio de pistas de audio y Picture-in-Picture (PiP).
 * **Sistema de Actualización In-App:** Un sistema nativo de auto-actualizaciones a través de la API de GitHub Releases, permitiendo distribuir la app directamente sin depender de tiendas cerradas.
 
@@ -53,7 +53,7 @@ Nuvio fue concebido originalmente como un agregador de medios con plugins extern
 ## ✨ Características Principales
 
 - 📡 **Xtream Codes & M3U:** Conexión directa a tus servidores IPTV con soporte de credenciales seguras.
-- 📺 **TV en Vivo & VOD Separados:** Catálogos independientes con navegación organizada por categorías.
+- 📺 **Canales en Vivo & VOD Separados:** Catálogos independientes con navegación organizada por categorías.
 - 🎨 **Material You & Jetpack Compose:** Interfaz moderna que se adapta a los colores de tu sistema.
 - ⚡ **ExoPlayer con Aceleración Hardware:** Calidad óptima y bajo consumo de recursos.
 - 🔄 **Actualizador Integrado:** Alerta y descarga de nuevas versiones directamente desde GitHub.
