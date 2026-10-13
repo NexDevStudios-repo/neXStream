@@ -1,6 +1,8 @@
 <div align="center">
 
-  <h1>⚡ neXStream</h1>
+  <a href="https://nexdevstudios.vercel.app/">
+    <img src="assets/logo.png" alt="neXStream" width="280" />
+  </a>
 
   <p>
     Un reproductor IPTV moderno, fluido y de alto rendimiento para Android y Android TV.
@@ -8,7 +10,9 @@
     Construido con Kotlin Multiplatform y Jetpack Compose (Material You).
   </p>
 
-  [Descargar APK (GitHub Releases)](https://github.com/NexDevStudios-repo/neXStream/releases/latest)
+  <p>
+    <a href="https://nexdevstudios.vercel.app/"><strong>🌐 Sitio Web Oficial</strong></a> &nbsp;•&nbsp; <a href="https://github.com/NexDevStudios-repo/neXStream/releases/latest"><strong>📥 Descargar APK (GitHub Releases)</strong></a>
+  </p>
 
 </div>
 
