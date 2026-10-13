@@ -66,7 +66,7 @@ import nuvio.composeapp.generated.resources.about_supporters_contributors_subtit
 import nuvio.composeapp.generated.resources.about_licenses_attributions_subtitle
 import org.jetbrains.compose.resources.stringResource
 
-private const val PRIVACY_POLICY_URL = "https://nuvio.tv/privacy-policy"
+private const val PRIVACY_POLICY_URL = "https://nexdevstudios.vercel.app/legal.html"
 
 internal fun LazyListScope.settingsRootContent(
     isTablet: Boolean,

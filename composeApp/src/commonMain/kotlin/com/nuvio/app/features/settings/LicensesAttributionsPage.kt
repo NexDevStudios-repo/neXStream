@@ -36,12 +36,8 @@ import nuvio.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-private const val TmdbUrl = "https://www.themoviedb.org"
 private const val ImdbDatasetsUrl = "https://developer.imdb.com/non-commercial-datasets/"
-private const val TraktUrl = "https://trakt.tv"
-private const val SimklUrl = "https://simkl.com"
-private const val MdbListUrl = "https://mdblist.com"
-private const val IntroDbUrl = "https://introdb.app/"
+private const val NexStreamRepositoryUrl = "https://github.com/NexDevStudios-repo/neXStream"
 private const val NuvioRepositoryUrl = "https://github.com/NuvioMedia/NuvioMobile"
 private const val MpvKitUrl = "https://github.com/mpvkit/MPVKit"
 private const val ApacheLicenseUrl = "https://www.apache.org/licenses/LICENSE-2.0"
@@ -101,6 +97,11 @@ private fun LicensesAttributionsBody(
         ) {
             LicenseRow(
                 item = appLicenseItem(),
+                isTablet = isTablet,
+            )
+            PlainStackDivider()
+            LicenseRow(
+                item = upstreamLicenseItem(),
                 isTablet = isTablet,
             )
         }
@@ -331,36 +332,6 @@ private fun PlainStackDivider() {
 
 private fun attributionItems(): List<AttributionItem> = listOf(
     AttributionItem(
-        titleRes = Res.string.settings_licenses_attributions_tmdb_title,
-        bodyRes = Res.string.settings_licenses_attributions_tmdb_body,
-        logo = IntegrationLogo.Tmdb,
-        link = TmdbUrl,
-    ),
-    AttributionItem(
-        titleRes = Res.string.settings_licenses_attributions_trakt_title,
-        bodyRes = Res.string.settings_licenses_attributions_trakt_body,
-        logo = IntegrationLogo.Trakt,
-        link = TraktUrl,
-    ),
-    AttributionItem(
-        titleRes = Res.string.settings_licenses_attributions_simkl_title,
-        bodyRes = Res.string.settings_licenses_attributions_simkl_body,
-        logo = IntegrationLogo.Simkl,
-        link = SimklUrl,
-    ),
-    AttributionItem(
-        titleRes = Res.string.settings_licenses_attributions_mdblist_title,
-        bodyRes = Res.string.settings_licenses_attributions_mdblist_body,
-        logo = IntegrationLogo.MdbList,
-        link = MdbListUrl,
-    ),
-    AttributionItem(
-        titleRes = Res.string.settings_licenses_attributions_introdb_title,
-        bodyRes = Res.string.settings_licenses_attributions_introdb_body,
-        logo = IntegrationLogo.IntroDb,
-        link = IntroDbUrl,
-    ),
-    AttributionItem(
         titleRes = Res.string.settings_licenses_attributions_imdb_title,
         bodyRes = Res.string.settings_licenses_attributions_imdb_body,
         logo = null,
@@ -373,6 +344,14 @@ private fun appLicenseItem(): LicenseItem =
         titleRes = Res.string.settings_licenses_attributions_nuvio_title,
         bodyRes = Res.string.settings_licenses_attributions_nuvio_body,
         licenseRes = Res.string.settings_licenses_attributions_nuvio_license,
+        link = NexStreamRepositoryUrl,
+    )
+
+private fun upstreamLicenseItem(): LicenseItem =
+    LicenseItem(
+        titleRes = Res.string.settings_licenses_attributions_upstream_nuvio_title,
+        bodyRes = Res.string.settings_licenses_attributions_upstream_nuvio_body,
+        licenseRes = Res.string.settings_licenses_attributions_upstream_nuvio_license,
         link = NuvioRepositoryUrl,
     )
 

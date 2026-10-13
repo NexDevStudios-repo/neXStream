@@ -9,7 +9,7 @@
     <string name="profile_background_normal">Normal</string>
     <string name="profile_background_custom">Personalizado</string>
     <string name="about_licenses_attributions_subtitle">Fuentes de datos, reconocimientos y licencias de plataforma</string>
-    <string name="about_supporters_contributors_subtitle">Apoya a Nex Dev Studios mediante Cafecito</string>
+    <string name="about_supporters_contributors_subtitle">Canales oficiales de asistencia, comunidad y donaciones</string>
     <string name="action_back">Atrás</string>
     <string name="action_cancel">Cancelar</string>
     <string name="action_close">Cerrar</string>
@@ -516,7 +516,7 @@
     <string name="compose_settings_page_root">Configuración</string>
     <string name="compose_settings_page_streams">Corrientes</string>
     <string name="settings_appearance_section_streams">CORRIENTES</string>
-    <string name="compose_settings_page_supporters_contributors">Patrocinadores</string>
+    <string name="compose_settings_page_supporters_contributors">Soporte</string>
     <string name="compose_settings_page_tmdb_enrichment">Enriquecimiento TMDB</string>
     <string name="compose_settings_page_trakt">Trakt</string>
     <string name="compose_settings_page_tracking">Seguimiento</string>
@@ -578,6 +578,9 @@
     <string name="settings_licenses_attributions_nuvio_title">neXStream móvil</string>
     <string name="settings_licenses_attributions_nuvio_body">El código fuente y los términos de la licencia están disponibles en el repositorio del proyecto.</string>
     <string name="settings_licenses_attributions_nuvio_license">Licenciado bajo la Licencia Pública General GNU v3.0.</string>
+    <string name="settings_licenses_attributions_upstream_nuvio_title">Nuvio Mobile</string>
+    <string name="settings_licenses_attributions_upstream_nuvio_body">neXStream es una bifurcación (fork) del proyecto de código abierto Nuvio Mobile desarrollado por Nuvio Media. Reconocimiento y crédito total al equipo original por la autoría del código base.</string>
+    <string name="settings_licenses_attributions_upstream_nuvio_license">Licenciado bajo la Licencia Pública General GNU v3.0.</string>
     <string name="settings_licenses_attributions_tmdb_title">La base de datos de películas (TMDB)</string>
     <string name="settings_licenses_attributions_tmdb_body">neXStream utiliza la API TMDB para metadatos, ilustraciones, avances, reparto, detalles de producción, colecciones y recomendaciones de películas y TV. Este producto utiliza la API de TMDB pero no está respaldado ni certificado por TMDB.</string>
     <string name="settings_licenses_attributions_imdb_title">Conjuntos de datos no comerciales de IMDb</string>
@@ -2333,4 +2336,21 @@ Utilizas esta función bajo tu propia responsabilidad. P2P se puede desactivar e
     <string name="movie_status_rumored">Rumoreada</string>
     <string name="movie_status_in_production">En producción</string>
     <string name="movie_status_post_production">Posproducción</string>
+
+    <!-- Soporte y Comunidad -->
+    <string name="support_hero_title">Nex Dev Studios</string>
+    <string name="support_hero_subtitle">Desarrollo independiente y soporte continuo para neXStream.</string>
+    <string name="support_hero_description">Sigue las actualizaciones, consulta dudas técnicas, únete a la comunidad o envía sugerencias directamente a través de nuestros canales oficiales.</string>
+    <string name="support_section_community">COMUNIDAD Y CONTACTO</string>
+    <string name="support_telegram_title">Canal de Telegram</string>
+    <string name="support_telegram_subtitle">Anuncios, nuevas versiones y soporte comunitario</string>
+    <string name="support_instagram_title">Instagram Oficial</string>
+    <string name="support_instagram_subtitle">@nexdevstudios_ · Novedades, historias y avances</string>
+    <string name="support_x_title">X (Twitter) Oficial</string>
+    <string name="support_x_subtitle">@nexdevstudios_ · Actualizaciones y noticias en tiempo real</string>
+    <string name="support_email_title">Correo de Soporte</string>
+    <string name="support_email_subtitle">soportenexdevstudiosoficial@gmail.com</string>
+    <string name="support_section_donations">PATROCINIO Y DONACIONES</string>
+    <string name="support_cafecito_title">Apoyar en Cafecito</string>
+    <string name="support_cafecito_subtitle">Ayúdanos con un cafecito a mantener servidores y seguir mejorando neXStream</string>
 </resources>

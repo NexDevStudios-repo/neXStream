@@ -9,7 +9,7 @@
     <string name="profile_background_normal">Normal</string>
     <string name="profile_background_custom">Custom</string>
     <string name="about_licenses_attributions_subtitle">Data sources, acknowledgements, and platform licenses</string>
-    <string name="about_supporters_contributors_subtitle">Open recognition and project credits</string>
+    <string name="about_supporters_contributors_subtitle">Official support channels, community, and donations</string>
     <string name="action_back">Back</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_close">Close</string>
@@ -518,7 +518,7 @@
     <string name="compose_settings_page_root">Settings</string>
     <string name="compose_settings_page_streams">Streams</string>
     <string name="settings_appearance_section_streams">STREAMS</string>
-    <string name="compose_settings_page_supporters_contributors">Supporters &amp; Contributors</string>
+    <string name="compose_settings_page_supporters_contributors">Support</string>
     <string name="compose_settings_page_tmdb_enrichment">TMDB Enrichment</string>
     <string name="compose_settings_page_trakt">Trakt</string>
     <string name="compose_settings_page_tracking">Tracking</string>
@@ -580,6 +580,9 @@
     <string name="settings_licenses_attributions_nuvio_title">neXStream</string>
     <string name="settings_licenses_attributions_nuvio_body">Source code and license terms are available in the project repository.</string>
     <string name="settings_licenses_attributions_nuvio_license">Licensed under the GNU General Public License v3.0.</string>
+    <string name="settings_licenses_attributions_upstream_nuvio_title">Nuvio Mobile</string>
+    <string name="settings_licenses_attributions_upstream_nuvio_body">neXStream is a fork based on the open source project Nuvio Mobile created by Nuvio Media. Full credit and acknowledgements to the original authors.</string>
+    <string name="settings_licenses_attributions_upstream_nuvio_license">Licensed under the GNU General Public License v3.0.</string>
     <string name="settings_licenses_attributions_tmdb_title">The Movie Database (TMDB)</string>
     <string name="settings_licenses_attributions_tmdb_body">neXStream uses the TMDB API for movie and TV metadata, artwork, trailers, cast, production details, collections, and recommendations. This product uses the TMDB API but is not endorsed or certified by TMDB.</string>
     <string name="settings_licenses_attributions_imdb_title">IMDb Non-Commercial Datasets</string>
@@ -2408,4 +2411,21 @@
     <string name="movie_status_rumored">Rumored</string>
     <string name="movie_status_in_production">In Production</string>
     <string name="movie_status_post_production">Post Production</string>
+
+    <!-- Support and Community -->
+    <string name="support_hero_title">Nex Dev Studios</string>
+    <string name="support_hero_subtitle">Independent development and continuous support for neXStream.</string>
+    <string name="support_hero_description">Follow updates, get help, join our community, or send suggestions directly through our official channels.</string>
+    <string name="support_section_community">COMMUNITY &amp; CONTACT</string>
+    <string name="support_telegram_title">Telegram Channel</string>
+    <string name="support_telegram_subtitle">Announcements, new releases, and community support</string>
+    <string name="support_instagram_title">Instagram</string>
+    <string name="support_instagram_subtitle">@nexdevstudios_ · Updates, previews, and stories</string>
+    <string name="support_x_title">X (Twitter)</string>
+    <string name="support_x_subtitle">@nexdevstudios_ · Real-time news and announcements</string>
+    <string name="support_email_title">Support Email</string>
+    <string name="support_email_subtitle">soportenexdevstudiosoficial@gmail.com</string>
+    <string name="support_section_donations">DONATIONS &amp; SPONSORSHIP</string>
+    <string name="support_cafecito_title">Support on Cafecito</string>
+    <string name="support_cafecito_subtitle">Help us maintain servers and keep neXStream actively improving</string>
 </resources>
